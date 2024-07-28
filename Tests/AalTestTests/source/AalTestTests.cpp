@@ -3,7 +3,7 @@
 
 namespace Simple
 {
-    void TestCanExecute()
+    static void TestCanExecute()
     {
         TestRunner runner{ TestRunner::OutputMode::None };
         TestSuite suite{};
@@ -15,7 +15,7 @@ namespace Simple
         AalTest::AreEqual(i, 1);
     }
 
-    void TestCanPass()
+    static void TestCanPass()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -34,7 +34,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestCanFail()
+    static void TestCanFail()
     {
         int expectedPasses = 0;
         int expectedFails = 1;
@@ -53,7 +53,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestCanBeSkipped()
+    static void TestCanBeSkipped()
     {
         int expectedPasses = 0;
         int expectedFails = 0;
@@ -72,7 +72,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestSuitesReturnsAddedTests()
+    static void TestSuitesReturnsAddedTests()
     {
         auto expectedTestCount = 2;
         TestSuite suite{};
@@ -88,7 +88,7 @@ namespace Simple
         AalTest::AreEqual(expectedTestCount, (int)suite.tests().size());
     }
 
-    void TestContainsCallingTestName()
+    static void TestContainsCallingTestName()
     {
         QString expectedName = QString("TestContainsCallingTestName");
         TestRunner runner{ TestRunner::OutputMode::None };
@@ -103,7 +103,7 @@ namespace Simple
         AalTest::AreEqual(expectedName, test->testName());
     }
 
-    void TestIsTrueWhenTrue()
+    static void TestIsTrueWhenTrue()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -123,7 +123,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestIsTrueWhenFalse()
+    static void TestIsTrueWhenFalse()
     {
         int expectedPasses = 0;
         int expectedFails = 1;
@@ -143,7 +143,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestIsFalseWhenFalse()
+    static void TestIsFalseWhenFalse()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -163,7 +163,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestIsFalseWhenTrue()
+    static void TestIsFalseWhenTrue()
     {
         int expectedPasses = 0;
         int expectedFails = 1;
@@ -183,7 +183,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenTrueAndTrue()
+    static void TestAreEqualWhenTrueAndTrue()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -204,7 +204,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenFalseAndFalse()
+    static void TestAreEqualWhenFalseAndFalse()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -225,7 +225,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenTrueAndFalse()
+    static void TestAreEqualWhenTrueAndFalse()
     {
         int expectedPasses = 0;
         int expectedFails = 1;
@@ -246,7 +246,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenZeroAndZero()
+    static void TestAreEqualWhenZeroAndZero()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -267,7 +267,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenOneAndOne()
+    static void TestAreEqualWhenOneAndOne()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -288,7 +288,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenOneAndZero()
+    static void TestAreEqualWhenOneAndZero()
     {
         int expectedPasses = 0;
         int expectedFails = 1;
@@ -351,7 +351,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenStringAndDifferentString()
+    static void TestAreEqualWhenStringAndDifferentString()
     {
         int expectedPasses = 0;
         int expectedFails = 1;
@@ -372,7 +372,7 @@ namespace Simple
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestRunnerExecutesTests()
+    static void TestRunnerExecutesTests()
     {
         int expectedPasses = 1;
         int expectedFails = 1;
@@ -401,7 +401,7 @@ namespace Simple
 
 namespace Parameterized
 {
-    void TestCanExecuteWithParameters(bool data)
+    static void TestCanExecuteWithParameters(bool data)
     {
         TestRunner runner{ TestRunner::OutputMode::None };
         TestSuite suite{};
@@ -413,12 +413,12 @@ namespace Parameterized
         AalTest::AreEqual(i, 1);
     }
 
-    QList<std::tuple<bool>> TestCanExecuteWithParameters_Data()
+    static QList<std::tuple<bool>> TestCanExecuteWithParameters_Data()
     {
         return { std::make_tuple(true), std::make_tuple(false) };
     }
 
-    void TestWithTwoEmptySubTestsHasTwoPasses()
+    static void TestWithTwoEmptySubTestsHasTwoPasses()
     {
         int expectedPasses = 2;
         int expectedFails = 0;
@@ -441,7 +441,7 @@ namespace Parameterized
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestWithSkipOnTrueInThreeSubTestsHasTwoPassesAndOneSkip()
+    static void TestWithSkipOnTrueInThreeSubTestsHasTwoPassesAndOneSkip()
     {
         int expectedPasses = 2;
         int expectedFails = 0;
@@ -465,7 +465,7 @@ namespace Parameterized
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestWithFailInTwoSubTestsHasTwoFails()
+    static void TestWithFailInTwoSubTestsHasTwoFails()
     {
         int expectedPasses = 0;
         int expectedFails = 2;
@@ -488,7 +488,7 @@ namespace Parameterized
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestWithIsTrueCheckInTwoSubTestsHasOnePassAndOneFails()
+    static void TestWithIsTrueCheckInTwoSubTestsHasOnePassAndOneFails()
     {
         int expectedPasses = 1;
         int expectedFails = 1;
@@ -511,7 +511,7 @@ namespace Parameterized
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestWithSkipOnTrueAndFailHasOneSkipAndTwoFails()
+    static void TestWithSkipOnTrueAndFailHasOneSkipAndTwoFails()
     {
         int expectedPasses = 0;
         int expectedFails = 2;
@@ -537,7 +537,7 @@ namespace Parameterized
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestWithSkipInTwoSubTestsHasTwoSkips()
+    static void TestWithSkipInTwoSubTestsHasTwoSkips()
     {
         int expectedPasses = 0;
         int expectedFails = 0;
@@ -560,7 +560,7 @@ namespace Parameterized
         AalTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestWithoutDataDontExecute()
+    static void TestWithoutDataDontExecute()
     {
         int expectedPasses = 0;
         int expectedFails = 0;
