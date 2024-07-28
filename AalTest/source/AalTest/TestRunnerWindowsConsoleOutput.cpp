@@ -63,7 +63,7 @@ namespace
 TestRunnerWindowsConsoleOutput::TestRunnerWindowsConsoleOutput()
     : m_consoleHandle{ GetStdHandle(STD_OUTPUT_HANDLE) }
     , m_oldConsoleOutputCodePage{ GetConsoleOutputCP() }
-    , m_headerSize{ 70 }
+    , m_headerSize{ 105 }
 {
     SetConsoleOutputCP(CP_UTF8);
 }
