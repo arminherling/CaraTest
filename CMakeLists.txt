@@ -10,4 +10,7 @@ qt_standard_project_setup()
 
 add_subdirectory(AalTest)
 
-add_subdirectory(Tests/AalTestTests)
+option(AALTEST_BUILD_TESTS "Enable building tests." OFF)
+if(AALTEST_BUILD_TESTS)
+    add_subdirectory(Tests/AalTestTests)
+endif()
