@@ -1,9 +1,9 @@
 #include <AalTest.h>
 #include "AalTestTests.h"
 
-int main()
+int main(int argc, char* argv[])
 {
-    AalTest::TestRunner runner{};
+    AalTest::TestRunner runner{argc, argv};
     auto testSuites = AalTestTestsSuite();
 
     runner.run(testSuites);

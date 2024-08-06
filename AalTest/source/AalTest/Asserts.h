@@ -1,6 +1,7 @@
 #pragma once
 
 #include <AalTest/API.h>
+#include <AalTest/FailureBehavior.h>
 #include <AalTest/Stringify.h>
 #include <AalTest/ValueMismatchTestException.h>
 
@@ -19,6 +20,9 @@ namespace AalTest
     void AreEqual(T1&& expectedValue, T2&& actualValue, const std::source_location& location = std::source_location::current())
     {
         if (expectedValue != actualValue)
+        {
+            HANDLE_AALTEST_FAILURE();
             throw ValueMismatchTestException(Stringify(expectedValue), Stringify(actualValue), location);
+        }
     }
 }

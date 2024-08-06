@@ -1,6 +1,7 @@
 #include "TestRunner.h"
 #include <AalTest/TestRunnerNullOutput.h>
 #include <AalTest/TestRunnerWindowsConsoleOutput.h>
+#include <AalTest/FailureBehavior.h>
 
 namespace
 {
@@ -19,10 +20,31 @@ namespace
                 return std::make_unique<TestRunnerNullOutput>();
         }
     }
+
+    void ParseAndSetFailureBehavior(int argc, char* argv[])
+    {
+        if(argc >= 2)
+        {
+            for (int i = 1; i < argc; i++)
+            {
+                auto argument = QString::fromLocal8Bit(argv[i]);
+                if (argument.compare("--break_on_fail", Qt::CaseSensitivity::CaseInsensitive) == 0)
+                {
+                    g_aalTestFailureBehavior = FailureBehavior::DebugBreak;
+                }
+            }
+        }
+    }
 }
 
 namespace AalTest
 {
+    TestRunner::TestRunner(int argc, char* argv[], OutputMode output)
+        : TestRunner{ output }
+    {
+        ParseAndSetFailureBehavior(argc, argv);
+    }
+
     TestRunner::TestRunner(OutputMode output)
         : m_output{ CreateOutput(output) }
     {
