@@ -6,22 +6,25 @@
 #include <AalTest/TestSuiteResult.h>
 #include <QList>
 
-class AALTEST_API TestRunner
+namespace AalTest
 {
-public:
-    enum class OutputMode
+    class AALTEST_API TestRunner
     {
-        None,
-        Console
+    public:
+        enum class OutputMode
+        {
+            None,
+            WindowsConsole
+        };
+
+        TestRunner(OutputMode output = OutputMode::WindowsConsole);
+
+        void run(const TestSuite& suite);
+        void run(const QList<TestSuite>& suites);
+
+    private:
+        std::unique_ptr<TestRunnerOutputBase> m_output;
+
+        TestSuiteResult runInternal(const TestSuite& suite);
     };
-
-    TestRunner(OutputMode output = OutputMode::Console);
-
-    void run(const TestSuite& suite);
-    void run(const QList<TestSuite>& suites);
-
-private:
-    std::unique_ptr<TestRunnerOutputBase> m_output;
-
-    TestSuiteResult runInternal(const TestSuite& suite);
-};
+}

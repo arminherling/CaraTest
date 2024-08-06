@@ -3,10 +3,13 @@
 #include <exception>
 #include <source_location>
 
-class SkipTestException : public std::exception
+namespace AalTest
 {
-public:
-    SkipTestException(const std::source_location& sourceLocation);
+    class SkipTestException : public std::exception
+    {
+    public:
+        SkipTestException(const std::source_location& sourceLocation);
 
-    std::source_location location;
-};
+        std::source_location location;
+    };
+}

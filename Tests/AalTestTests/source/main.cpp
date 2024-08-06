@@ -3,7 +3,7 @@
 
 int main()
 {
-    TestRunner runner{};
+    AalTest::TestRunner runner{};
     auto testSuites = AalTestTestsSuite();
 
     runner.run(testSuites);

@@ -1,6 +1,9 @@
 #include "SkipTestException.h"
 
-SkipTestException::SkipTestException(const std::source_location& sourceLocation)
-    : location{ sourceLocation }
+namespace AalTest
 {
+    SkipTestException::SkipTestException(const std::source_location& sourceLocation)
+        : location{ sourceLocation }
+    {
+    }
 }

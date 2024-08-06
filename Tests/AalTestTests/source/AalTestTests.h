@@ -2,7 +2,7 @@
 
 #include <AalTest/TestSuite.h>
 
-TestSuite AalTestTestsSuiteSimple();
-TestSuite AalTestTestsSuiteParameterized();
+AalTest::TestSuite AalTestTestsSuiteSimple();
+AalTest::TestSuite AalTestTestsSuiteParameterized();
 
-QList<TestSuite> AalTestTestsSuite();
+QList<AalTest::TestSuite> AalTestTestsSuite();

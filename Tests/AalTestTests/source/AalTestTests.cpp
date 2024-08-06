@@ -1,6 +1,8 @@
 #include "AalTestTests.h"
 #include <AalTest.h>
 
+using namespace AalTest;
+
 namespace Simple
 {
     static void TestCanExecute()
@@ -98,7 +100,7 @@ namespace Simple
                 AalTest::Skip();
             });
 
-        auto test = suite.tests().at(0);
+        auto& test = suite.tests().at(0);
 
         AalTest::AreEqual(expectedName, test->testName());
     }

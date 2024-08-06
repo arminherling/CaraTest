@@ -2,15 +2,18 @@
 
 #include <QList>
 
-enum class TestResultKind
+namespace AalTest
 {
-    Invalid,
-    Skipped,
-    Failed,
-    Passed
-};
+    enum class TestResultKind
+    {
+        Invalid,
+        Skipped,
+        Failed,
+        Passed
+    };
 
-struct TestResult
-{
-    QList<TestResultKind> data;
-};
+    struct TestResult
+    {
+        QList<TestResultKind> data;
+    };
+}

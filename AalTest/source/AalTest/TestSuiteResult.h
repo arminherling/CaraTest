@@ -2,11 +2,14 @@
 
 #include <chrono>
 
-struct TestSuiteResult
+namespace AalTest
 {
-    int passedTestCount;
-    int skippedTestCount;
-    int failedTestCount;
-    int totalTestCount;
-    std::chrono::nanoseconds duration;
-};
+    struct TestSuiteResult
+    {
+        int passedTestCount;
+        int skippedTestCount;
+        int failedTestCount;
+        int totalTestCount;
+        std::chrono::nanoseconds duration;
+    };
+}

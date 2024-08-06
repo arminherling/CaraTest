@@ -1,6 +1,9 @@
 #include "FailedTestException.h"
 
-FailedTestException::FailedTestException(const std::source_location& sourceLocation)
-    : location{ sourceLocation }
+namespace AalTest
 {
+    FailedTestException::FailedTestException(const std::source_location& sourceLocation)
+        : location{ sourceLocation }
+    {
+    }
 }
