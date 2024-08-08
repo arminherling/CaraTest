@@ -27,10 +27,14 @@ namespace
         {
             for (int i = 1; i < argc; i++)
             {
-                auto argument = QString::fromLocal8Bit(argv[i]);
+                const auto argument = QString::fromLocal8Bit(argv[i]);
                 if (argument.compare("--break_on_fail", Qt::CaseSensitivity::CaseInsensitive) == 0)
                 {
                     g_aalTestFailureBehavior = FailureBehavior::DebugBreak;
+                } 
+                else if (argument.compare("--break_and_rerun_on_fail", Qt::CaseSensitivity::CaseInsensitive) == 0)
+                {
+                    g_aalTestFailureBehavior = FailureBehavior::DebugBreakAndRerun;
                 }
             }
         }

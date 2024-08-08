@@ -1,9 +1,11 @@
 #pragma once
 
+#include <AalTest/FailureBehavior.h>
 #include <AalTest/Stringify.h>
 #include <AalTest/TestBase.h>
 #include <AalTest/TestResult.h>
 #include <AalTest/TestRunnerOutputBase.h>
+
 #include <memory>
 #include <QString>
 
@@ -32,14 +34,14 @@ namespace AalTest
             if (totalSubTestCount == 0)
                 return;
 
-            for (const auto& tuple : m_data)
+            for (const auto& parameters : m_data)
             {
                 QPoint resultPosition;
                 try
                 {
-                    resultPosition = output->writeSubTestHeader(headerIndentation, currentTest, totalSubTestCount, Stringify(tuple));
+                    resultPosition = output->writeSubTestHeader(headerIndentation, currentTest, totalSubTestCount, Stringify(parameters));
 
-                    std::apply(m_function, tuple);
+                    std::apply(m_function, parameters);
 
                     output->updateTestResult(resultPosition, TestResultKind::Passed);
                     output->writeTestPassedMessage();
@@ -53,12 +55,14 @@ namespace AalTest
                 }
                 catch (FailedTestException& e)
                 {
+                    rerunTest(parameters);
                     output->updateTestResult(resultPosition, TestResultKind::Failed);
                     output->writeTestFailedMessage(e);
                     addResult(TestResultKind::Failed);
                 }
                 catch (ValueMismatchTestException& e)
                 {
+                    rerunTest(parameters);
                     output->updateTestResult(resultPosition, TestResultKind::Failed);
                     output->writeTestValueMismatchMessage(e);
                     addResult(TestResultKind::Failed);
@@ -82,6 +86,20 @@ namespace AalTest
         }
 
     private:
+        template<typename TPara>
+        void rerunTest(const TPara& parameters) const
+        {
+            if (g_aalTestFailureBehavior == FailureBehavior::DebugBreakAndRerun)
+            {
+                try
+                {
+                    TRIGGER_DEBUG_BREAK();
+                    std::apply(m_function, parameters);
+                }
+                catch (...) {}
+            }
+        }
+
         TFunction m_function;
         TData m_data;
         QString m_testName;

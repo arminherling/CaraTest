@@ -1,20 +1,26 @@
 #pragma once
 
+#include <AalTest/API.h>
+
 namespace AalTest
 {
     enum class FailureBehavior
     {
         Default,
-        DebugBreak
+        DebugBreak,
+        DebugBreakAndRerun
     };
 
-    inline FailureBehavior g_aalTestFailureBehavior = FailureBehavior::Default;
 }
+extern "C" AALTEST_API AalTest::FailureBehavior g_aalTestFailureBehavior;
 
-#define HANDLE_AALTEST_FAILURE()                                        \
-    do {                                                                \
-        if(g_aalTestFailureBehavior == FailureBehavior::DebugBreak)     \
-        {                                                               \
-            __debugbreak();                                             \
-        }                                                               \
+#define TRIGGER_DEBUG_BREAK()                                                   \
+    __debugbreak();
+
+#define HANDLE_AALTEST_FAILURE()                                                \
+    do {                                                                        \
+        if(g_aalTestFailureBehavior == FailureBehavior::DebugBreak)             \
+        {                                                                       \
+           TRIGGER_DEBUG_BREAK();                                               \
+        }                                                                       \
     } while(false)

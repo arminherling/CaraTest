@@ -1,8 +1,10 @@
 #pragma once
 
+#include <AalTest/FailureBehavior.h>
 #include <AalTest/TestBase.h>
 #include <AalTest/TestResult.h>
 #include <AalTest/TestRunnerOutputBase.h>
+
 #include <memory>
 #include <QString>
 
@@ -39,11 +41,13 @@ namespace AalTest
             }
             catch (FailedTestException& e)
             {
+                rerunTest();
                 addResult(TestResultKind::Failed);
                 output->writeTestFailedMessage(e);
             }
             catch (ValueMismatchTestException& e)
             {
+                rerunTest();
                 addResult(TestResultKind::Failed);
                 output->writeTestValueMismatchMessage(e);
             }
@@ -66,6 +70,19 @@ namespace AalTest
         }
 
     private:
+        void rerunTest() const
+        {
+            if (g_aalTestFailureBehavior == FailureBehavior::DebugBreakAndRerun)
+            {
+                try
+                {
+                    TRIGGER_DEBUG_BREAK();
+                    m_function();
+                }
+                catch (...) {}
+            }
+        }
+
         TFunction m_function;
         QString m_testName;
     };
