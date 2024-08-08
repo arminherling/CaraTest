@@ -18,19 +18,11 @@ namespace AalTest
 
     void IsTrue(bool value, const std::source_location& location)
     {
-        if (!value)
-        {
-            HANDLE_AALTEST_FAILURE();
-            throw ValueMismatchTestException(Stringify(true), Stringify(value), location);
-        }
+        AreEqual(true, value, location);
     }
 
     void IsFalse(bool value, const std::source_location& location)
     {
-        if (value)
-        {
-            HANDLE_AALTEST_FAILURE();
-            throw ValueMismatchTestException(Stringify(false), Stringify(value), location);
-        }
+        AreEqual(false, value, location);
     }
 }
