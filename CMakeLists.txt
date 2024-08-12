@@ -12,5 +12,7 @@ add_subdirectory(AalTest)
 
 option(AALTEST_BUILD_TESTS "Enable building tests." OFF)
 if(AALTEST_BUILD_TESTS)
+    add_subdirectory(Tests/AllInOne)
     add_subdirectory(Tests/AalTestTests)
+    add_subdirectory(Tests/DiffTests)
 endif()
