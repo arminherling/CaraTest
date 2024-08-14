@@ -29,9 +29,9 @@ namespace
 
     std::string TestNumber(int currentNumber, int totalCount, bool printNumber)
     {
-        auto totalCountString = QString::number(totalCount);
-        auto countCharCount = totalCountString.length();
-        auto numberString = QString::number(currentNumber);
+        const auto totalCountString = QString::number(totalCount);
+        const auto countCharCount = totalCountString.length();
+        const auto numberString = QString::number(currentNumber);
 
         if (printNumber)
             return numberString.rightJustified(countCharCount, ' ').toStdString();
@@ -41,8 +41,8 @@ namespace
 
     std::string ResultNumber(int currentNumber, int totalCount)
     {
-        auto totalCountString = QString::number(totalCount);
-        auto numberString = QString::number(currentNumber);
+        const auto totalCountString = QString::number(totalCount);
+        const auto numberString = QString::number(currentNumber);
 
         return QString("%1/%2").arg(numberString, totalCountString).toStdString();
     }
@@ -90,19 +90,29 @@ namespace
 
         return parts.join(QString());
     }
-}
 
-TestRunnerWindowsConsoleOutput::TestRunnerWindowsConsoleOutput()
-    : m_consoleHandle{ GetStdHandle(STD_OUTPUT_HANDLE) }
-    , m_oldConsoleOutputCodePage{ GetConsoleOutputCP() }
-    , m_headerSize{ 105 }
-{
-    SetConsoleOutputCP(CP_UTF8);
-    SetConsoleMode(m_consoleHandle, ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    COORD CurrentCursorPosition(void* consoleHandle)
+    {
+        CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
+        GetConsoleScreenBufferInfo(consoleHandle, &screenBuffer);
+        return screenBuffer.dwCursorPosition;
+    }
 }
 
 namespace AalTest
 {
+    TestRunnerWindowsConsoleOutput::TestRunnerWindowsConsoleOutput()
+        : m_consoleHandle{ GetStdHandle(STD_OUTPUT_HANDLE) }
+        , m_oldConsoleOutputCodePage{ GetConsoleOutputCP() }
+    {
+        SetConsoleOutputCP(CP_UTF8);
+        SetConsoleMode(m_consoleHandle, ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo{};
+        GetConsoleScreenBufferInfo(m_consoleHandle, &screenBufferInfo);
+        const auto consoleWidth = screenBufferInfo.dwSize.X;
+        m_headerSize = consoleWidth - 12;
+    }
+
     void TestRunnerWindowsConsoleOutput::writeSuiteName(const QString& name)
     {
         if (name.isEmpty())
@@ -122,38 +132,32 @@ namespace AalTest
 
         std::cout << " " << testName.leftJustified(m_headerSize, '.').toStdString() << " " << std::flush;
 
-        CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
-        GetConsoleScreenBufferInfo(m_consoleHandle, &screenBuffer);
-        int x = screenBuffer.dwCursorPosition.X;
-        int y = screenBuffer.dwCursorPosition.Y;
+        const auto cursorPosition = CurrentCursorPosition(m_consoleHandle);
 
         std::cout << "....\n";
 
-        return { x, y };
+        return { cursorPosition.X, cursorPosition.Y };
     }
 
     QPoint TestRunnerWindowsConsoleOutput::writeSubTestHeader(int indentation, int currentTest, int totalTests, const QString& parameters)
     {
-        auto indent = QString(" ").repeated(indentation + 2);
+        const auto indent = QString(" ").repeated(indentation + 2);
 
-        auto testNumber = TestNumber(currentTest, totalTests, true);
-        auto testNumberSize = testNumber.size();
+        const auto testNumber = TestNumber(currentTest, totalTests, true);
+        const auto testNumberSize = testNumber.size();
 
-        auto spaceAndDashSize = 3;
-        auto testAndSubTestSizeDifference = testNumberSize - indent.size();
-        auto headerSize = m_headerSize - indent.size() - testAndSubTestSizeDifference - spaceAndDashSize;
-        auto truncatedParameters = parameters.left(headerSize - 3);
+        const auto spaceAndDashSize = 3;
+        const auto testAndSubTestSizeDifference = testNumberSize - indent.size();
+        const auto headerSize = m_headerSize - indent.size() - testAndSubTestSizeDifference - spaceAndDashSize;
+        const auto truncatedParameters = parameters.left(headerSize - 3);
 
         std::cout << indent.toStdString() << testNumber << " - " << truncatedParameters.leftJustified(headerSize, '.').toStdString() << " " << std::flush;
 
-        CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
-        GetConsoleScreenBufferInfo(m_consoleHandle, &screenBuffer);
-        int x = screenBuffer.dwCursorPosition.X;
-        int y = screenBuffer.dwCursorPosition.Y;
+        const auto cursorPosition = CurrentCursorPosition(m_consoleHandle);
 
         std::cout << "....\n";
 
-        return { x, y };
+        return { cursorPosition.X, cursorPosition.Y };
     }
 
     void TestRunnerWindowsConsoleOutput::updateTestResult(const QPoint& position, TestResultKind result)
@@ -163,21 +167,14 @@ namespace AalTest
         if (position.isNull())
             return;
 
-        CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
-        GetConsoleScreenBufferInfo(m_consoleHandle, &screenBuffer);
-        int oldX = screenBuffer.dwCursorPosition.X;
-        int oldY = screenBuffer.dwCursorPosition.Y;
+        const auto oldPosition = CurrentCursorPosition(m_consoleHandle);
 
-        COORD cursorPosition{};
-        cursorPosition.X = position.x();
-        cursorPosition.Y = position.y();
+        const auto cursorPosition = COORD{ (short)position.x(), (short)position.y()};
         SetConsoleCursorPosition(m_consoleHandle, cursorPosition);
 
         std::cout << StringifyTestResult(result).toStdString() << std::flush;
 
-        cursorPosition.X = oldX;
-        cursorPosition.Y = oldY;
-        SetConsoleCursorPosition(m_consoleHandle, cursorPosition);
+        SetConsoleCursorPosition(m_consoleHandle, oldPosition);
     }
 
     void TestRunnerWindowsConsoleOutput::writeTestPassedMessage()
