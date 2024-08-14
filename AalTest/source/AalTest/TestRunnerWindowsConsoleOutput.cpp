@@ -1,11 +1,31 @@
 ﻿#include "TestRunnerWindowsConsoleOutput.h"
 #include <AalTest/Stringify.h>
+#include <AalTest/Diff.h>
+
+#include <QRegularExpression>
+
+#include <algorithm>
 #include <iostream>
+
+#define NOMINMAX
 #include <Windows.h>
 
 namespace
 {
     using namespace AalTest;
+
+    const auto resetAttributes = "\033[0m";
+    const auto greenColorSequence = "\033[38;2;138;226;138m";
+    const auto yellowColorSequence = "\033[38;2;255;228;160m";
+    const auto redColorSequence = "\033[38;2;244;75;86m";
+
+    const auto coloredPass = QString("%1PASS%2").arg(greenColorSequence, resetAttributes);
+    const auto coloredSkip = QString("%1SKIP%2").arg(yellowColorSequence, resetAttributes);
+    const auto coloredFail = QString("%1FAIL%2").arg(redColorSequence, resetAttributes);
+
+    const auto underlinedSequence = "\033[4m";
+    const auto diffLineBreak = QString("%1\n%2%3").arg(resetAttributes, underlinedSequence, redColorSequence);
+    const auto lineBreakRegex = QRegularExpression("[\r\n]");
 
     std::string TestNumber(int currentNumber, int totalCount, bool printNumber)
     {
@@ -27,38 +47,48 @@ namespace
         return QString("%1/%2").arg(numberString, totalCountString).toStdString();
     }
 
-    QString StringifyTestResult(TestResultKind result, bool colorize)
+    QString StringifyTestResult(TestResultKind result)
     {
-        if (colorize)
+        switch (result)
         {
-            switch (result)
-            {
-                case TestResultKind::Skipped:
-                    return QString("\033[38;2;255;228;160mSKIP\033[0m");
-                case TestResultKind::Failed:
-                    return QString("\033[38;2;244;75;86mFAIL\033[0m");
-                case TestResultKind::Passed:
-                    return QString("\033[38;2;138;226;138mPASS\033[0m");
-                case TestResultKind::Invalid:
-                default:
-                    return QString("....");
-            }
+            case TestResultKind::Skipped:
+                return coloredSkip;
+            case TestResultKind::Failed:
+                return coloredFail;
+            case TestResultKind::Passed:
+                return coloredPass;
+            case TestResultKind::Invalid:
+            default:
+                return QString("....");
         }
-        else
-        {
-            switch (result)
-            {
-                case TestResultKind::Skipped:
-                    return QString("SKIP");
-                case TestResultKind::Failed:
-                    return QString("FAIL");
-                case TestResultKind::Passed:
-                    return QString("PASS");
-                case TestResultKind::Invalid:
-                default:
-                    return QString("....");
-            }
-        }
+    }
+
+    QString ColorDifferences(const QString& input, const QList<DiffLocation>& differences)
+    {
+        QStringList parts{};
+        int lastIndex = input.size();
+
+        std::for_each(differences.rbegin(), differences.rend(), 
+            [&](const DiffLocation& diff) {
+
+                parts.prepend(input.mid(diff.endIndex, lastIndex - diff.endIndex));
+
+                auto diffString = input.mid(diff.startIndex, diff.endIndex - diff.startIndex);
+                // we need to reset the console attributes and reapply after the linebreak to prevent a visual bug
+                diffString.replace(lineBreakRegex, diffLineBreak);
+
+                parts.prepend(resetAttributes);
+                parts.prepend(diffString);
+                parts.prepend(redColorSequence);
+                parts.prepend(underlinedSequence);
+
+                lastIndex = diff.startIndex;
+            });
+
+        if(lastIndex != 0)
+            parts.prepend(input.mid(0, lastIndex));
+
+        return parts.join(QString());
     }
 }
 
@@ -68,6 +98,7 @@ TestRunnerWindowsConsoleOutput::TestRunnerWindowsConsoleOutput()
     , m_headerSize{ 105 }
 {
     SetConsoleOutputCP(CP_UTF8);
+    SetConsoleMode(m_consoleHandle, ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 }
 
 namespace AalTest
@@ -77,7 +108,7 @@ namespace AalTest
         if (name.isEmpty())
             return;
 
-        std::cout << "         --== " << name.toStdString() << " ==--" << std::endl;
+        std::cout << "         --== " << name.toStdString() << " ==--\n";
     }
 
     QPoint TestRunnerWindowsConsoleOutput::writeTestHeader(int currentTest, int totalTests, const QString& testName, bool hasSubTests)
@@ -85,7 +116,7 @@ namespace AalTest
         std::cout << " " << TestNumber(currentTest, totalTests, !hasSubTests);
         if (hasSubTests)
         {
-            std::cout << testName.toStdString() << std::endl;
+            std::cout << testName.toStdString() << '\n';
             return {};
         }
 
@@ -96,7 +127,7 @@ namespace AalTest
         int x = screenBuffer.dwCursorPosition.X;
         int y = screenBuffer.dwCursorPosition.Y;
 
-        std::cout << "...." << std::endl;
+        std::cout << "....\n";
 
         return { x, y };
     }
@@ -120,7 +151,7 @@ namespace AalTest
         int x = screenBuffer.dwCursorPosition.X;
         int y = screenBuffer.dwCursorPosition.Y;
 
-        std::cout << "...." << std::endl;
+        std::cout << "....\n";
 
         return { x, y };
     }
@@ -137,12 +168,12 @@ namespace AalTest
         int oldX = screenBuffer.dwCursorPosition.X;
         int oldY = screenBuffer.dwCursorPosition.Y;
 
-        COORD cursorPosition;
+        COORD cursorPosition{};
         cursorPosition.X = position.x();
         cursorPosition.Y = position.y();
         SetConsoleCursorPosition(m_consoleHandle, cursorPosition);
 
-        std::cout << StringifyTestResult(result, true).toStdString() << std::flush;
+        std::cout << StringifyTestResult(result).toStdString() << std::flush;
 
         cursorPosition.X = oldX;
         cursorPosition.Y = oldY;
@@ -163,23 +194,37 @@ namespace AalTest
 
     void TestRunnerWindowsConsoleOutput::writeTestValueMismatchMessage(ValueMismatchTestException& e)
     {
-        std::cout << " " << e.location.file_name() << " Line:" << e.location.line() << std::endl;
+        std::cout << " " << e.location.file_name() << " Line:" << e.location.line() << '\n';
 
-        std::cout << "   Expected: " << e.expectedValue.toStdString() << std::endl;
-        std::cout << "   But got:  " << e.actualValue.toStdString() << std::endl;
+        const auto differences = Diff(e.expectedValue, e.actualValue);
+
+        const auto coloredOutput = ColorDifferences(e.actualValue, differences);
+
+        const auto length = std::max(e.expectedValue.size(), e.actualValue.size());
+        const auto insertLinebreak = (length > 20);
+
+        std::cout << "   Expected: ";
+        if (insertLinebreak)
+            std::cout << '\n';
+        std::cout << e.expectedValue.toStdString() << '\n';
+
+        std::cout << "   But got:  ";
+        if (insertLinebreak)
+            std::cout << '\n';
+        std::cout << coloredOutput.toStdString() << '\n';
     }
 
     void TestRunnerWindowsConsoleOutput::writeTestRunnerResult(const TestSuiteResult& result)
     {
         std::cout
-            << " " << StringifyTestResult(TestResultKind::Passed, true).toStdString()
+            << " " << coloredPass.toStdString()
             << " " << ResultNumber(result.passedTestCount, result.totalTestCount)
-            << " " << StringifyTestResult(TestResultKind::Skipped, true).toStdString()
+            << " " << coloredSkip.toStdString()
             << " " << ResultNumber(result.skippedTestCount, result.totalTestCount)
-            << " " << StringifyTestResult(TestResultKind::Failed, true).toStdString()
+            << " " << coloredFail.toStdString()
             << " " << ResultNumber(result.failedTestCount, result.totalTestCount)
             << " TIME " << Stringify(result.duration).toStdString()
-            << std::endl;
+            << '\n';
     }
 
     void TestRunnerWindowsConsoleOutput::writeTestRunnerTotalResult(const QList<TestSuiteResult>& results)
@@ -193,12 +238,12 @@ namespace AalTest
             totalResult.totalTestCount += result.totalTestCount;
             totalResult.duration += result.duration;
         }
-        std::cout << "                  ==== Total Result ====" << std::endl;
+        std::cout << "                  ==== Total Result ====\n";
         writeTestRunnerResult(totalResult);
     }
 
     void TestRunnerWindowsConsoleOutput::writeEmptyLine()
     {
-        std::cout << std::endl;
+        std::cout << '\n';
     }
 }

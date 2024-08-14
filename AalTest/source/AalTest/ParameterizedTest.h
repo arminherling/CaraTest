@@ -39,7 +39,8 @@ namespace AalTest
                 QPoint resultPosition;
                 try
                 {
-                    resultPosition = output->writeSubTestHeader(headerIndentation, currentTest, totalSubTestCount, Stringify(parameters));
+                    const auto stringifiedParameters = Sanitize(Stringify(parameters));
+                    resultPosition = output->writeSubTestHeader(headerIndentation, currentTest, totalSubTestCount, stringifiedParameters);
 
                     std::apply(m_function, parameters);
 

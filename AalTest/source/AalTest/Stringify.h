@@ -9,9 +9,10 @@ namespace AalTest
 {
     AALTEST_API QString Stringify(bool value);
     AALTEST_API QString Stringify(int value);
+    AALTEST_API QString Stringify(long long value);
     AALTEST_API QString Stringify(const char* str);
     AALTEST_API QString Stringify(const QString& string);
-    AALTEST_API QString Stringify(const QStringView string);
+    AALTEST_API QString Stringify(const QStringView stringView);
     AALTEST_API QString Stringify(const std::chrono::nanoseconds& ns);
 
     template<class T>
@@ -27,4 +28,6 @@ namespace AalTest
         auto parts = std::apply(converter, tuple);
         return QString("(%1)").arg(parts.join(", "));
     }
+
+    AALTEST_API QString Sanitize(QString input);
 }
