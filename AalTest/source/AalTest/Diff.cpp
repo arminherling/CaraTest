@@ -18,7 +18,10 @@ namespace AalTest
         const auto startIndex = std::distance(first.begin(), prefixMismatchResult.first);
         const auto firstIsStringOffset = (first.at(first.size() - 1) == '"') ? 1 : 0;
         const auto secondIsStringOffset = (second.at(second.size() - 1) == '"') ? 1 : 0;
-        const auto endIndex = std::max(first.size() - firstIsStringOffset, second.size() - secondIsStringOffset);
+
+        const auto suffixMismatchResult = std::mismatch(first.rbegin(), first.rend(), second.rbegin(), second.rend());
+        const auto suffixEndIndex = std::distance(first.rbegin(), suffixMismatchResult.first) - 1;
+        const auto endIndex = second.size() - secondIsStringOffset - suffixEndIndex;
 
         if (startIndex < endIndex)
             differences.append(DiffLocation{ .startIndex = (int)startIndex, .endIndex = (int)endIndex });
