@@ -14,16 +14,17 @@ namespace
 {
     using namespace AalTest;
 
-    const auto resetAttributes = "\033[0m";
-    const auto greenColorSequence = "\033[38;2;138;226;138m";
-    const auto yellowColorSequence = "\033[38;2;255;228;160m";
-    const auto redColorSequence = "\033[38;2;244;75;86m";
+    const auto resetAttributes = QString("\033[0m");
+    const auto greenColorSequence = QString("\033[38;2;138;226;138m");
+    const auto yellowColorSequence = QString("\033[38;2;255;228;160m");
+    const auto redColorSequence = QString("\033[38;2;244;75;86m");
+    const auto blueColorSequence = QString("\033[38;2;42;129;211m");
 
     const auto coloredPass = QString("%1PASS%2").arg(greenColorSequence, resetAttributes);
     const auto coloredSkip = QString("%1SKIP%2").arg(yellowColorSequence, resetAttributes);
     const auto coloredFail = QString("%1FAIL%2").arg(redColorSequence, resetAttributes);
 
-    const auto underlinedSequence = "\033[4m";
+    const auto underlinedSequence = QString("\033[4m");
     const auto diffLineBreak = QString("%1\n%2%3").arg(resetAttributes, underlinedSequence, redColorSequence);
     const auto lineBreakRegex = QRegularExpression("[\r\n]");
 
@@ -63,7 +64,7 @@ namespace
         }
     }
 
-    QString ColorDifferences(const QString& input, const QList<DiffLocation>& differences)
+    QString ColorDifferences(const QString& input, const QList<DiffLocation>& differences, const QString& colorSequence)
     {
         QStringList parts{};
         int lastIndex = input.size();
@@ -79,7 +80,7 @@ namespace
 
                 parts.prepend(resetAttributes);
                 parts.prepend(diffString);
-                parts.prepend(redColorSequence);
+                parts.prepend(colorSequence);
                 parts.prepend(underlinedSequence);
 
                 lastIndex = diff.startIndex;
@@ -193,9 +194,11 @@ namespace AalTest
     {
         std::cout << " " << e.location.file_name() << " Line:" << e.location.line() << '\n';
 
-        const auto differences = Diff(e.expectedValue, e.actualValue);
+        const auto expectedDifferences = Diff(e.actualValue, e.expectedValue);
+        const auto actualDifferences = Diff(e.expectedValue, e.actualValue);
 
-        const auto coloredOutput = ColorDifferences(e.actualValue, differences);
+        const auto expectedColoredOutput = ColorDifferences(e.expectedValue, expectedDifferences, blueColorSequence);
+        const auto actualColoredOutput = ColorDifferences(e.actualValue, actualDifferences, redColorSequence);
 
         const auto length = std::max(e.expectedValue.size(), e.actualValue.size());
         const auto insertLinebreak = (length > 20);
@@ -203,12 +206,12 @@ namespace AalTest
         std::cout << "   Expected: ";
         if (insertLinebreak)
             std::cout << '\n';
-        std::cout << e.expectedValue.toStdString() << '\n';
+        std::cout << expectedColoredOutput.toStdString() << '\n';
 
         std::cout << "   But got:  ";
         if (insertLinebreak)
             std::cout << '\n';
-        std::cout << coloredOutput.toStdString() << '\n';
+        std::cout << actualColoredOutput.toStdString() << '\n';
     }
 
     void TestRunnerWindowsConsoleOutput::writeTestRunnerResult(const TestSuiteResult& result)
