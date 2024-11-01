@@ -17,6 +17,7 @@ namespace
     const auto resetAttributes = QString("\033[0m");
     const auto greenColorSequence = QString("\033[38;2;138;226;138m");
     const auto yellowColorSequence = QString("\033[38;2;255;228;160m");
+    const auto orangeColorSequence = QString("\033[38;2;255;166;77m");
     const auto redColorSequence = QString("\033[38;2;244;75;86m");
     const auto blueColorSequence = QString("\033[38;2;42;129;211m");
 
@@ -64,17 +65,20 @@ namespace
         }
     }
 
-    QString ColorDifferences(const QString& input, const QList<DiffLocation>& differences, const QString& colorSequence)
+    QString ColorDifferences(const QString& input, const QList<DiffLocation>& differences, const QString& colorSequence, DiffChange change)
     {
         QStringList parts{};
         int lastIndex = input.size();
 
-        std::for_each(differences.rbegin(), differences.rend(), 
+        std::for_each(differences.rbegin(), differences.rend(),
             [&](const DiffLocation& diff) {
+                if (diff.change != change)
+                    return;
 
-                parts.prepend(input.mid(diff.endIndex, lastIndex - diff.endIndex));
+                const auto endIndex = diff.endIndex + 1;
+                parts.prepend(input.mid(endIndex, lastIndex - endIndex));
 
-                auto diffString = input.mid(diff.startIndex, diff.endIndex - diff.startIndex);
+                auto diffString = input.mid(diff.startIndex, endIndex - diff.startIndex);
                 // we need to reset the console attributes and reapply after the linebreak to prevent a visual bug
                 diffString.replace(lineBreakRegex, diffLineBreak);
 
@@ -86,7 +90,7 @@ namespace
                 lastIndex = diff.startIndex;
             });
 
-        if(lastIndex != 0)
+        if (lastIndex != 0)
             parts.prepend(input.mid(0, lastIndex));
 
         return parts.join(QString());
@@ -97,6 +101,25 @@ namespace
         CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
         GetConsoleScreenBufferInfo(consoleHandle, &screenBuffer);
         return screenBuffer.dwCursorPosition;
+    }
+
+    QList<DiffLocation> DiffAll(const QString& first, const QString& second)
+    {
+        QList<DiffLocation> differences;
+
+        if (first.isNull() || second.isNull())
+            return differences;
+
+        if (first == second && first.isEmpty())
+            return differences;
+
+        const int firstLength = first.size();
+        const int secondLength = second.size();
+
+        differences.append(DiffLocation{ .startIndex = 0, .endIndex = firstLength, .change = DiffChange::Addition });
+        differences.append(DiffLocation{ .startIndex = 0, .endIndex = secondLength, .change = DiffChange::Deletion });
+
+        return differences;
     }
 }
 
@@ -194,11 +217,18 @@ namespace AalTest
     {
         std::cout << " " << e.location.file_name() << " Line:" << e.location.line() << '\n';
 
-        const auto expectedDifferences = Diff(e.actualValue, e.expectedValue);
-        const auto actualDifferences = Diff(e.expectedValue, e.actualValue);
+        QList<DiffLocation> differences;
+        if (e.outputMode == ValueMismatchTestException::OutputMode::Diff)
+        {
+            differences = Diff(e.expectedValue, e.actualValue);
+        }
+        else
+        {
+            differences = DiffAll(e.expectedValue, e.actualValue);
+        }
 
-        const auto expectedColoredOutput = ColorDifferences(e.expectedValue, expectedDifferences, blueColorSequence);
-        const auto actualColoredOutput = ColorDifferences(e.actualValue, actualDifferences, redColorSequence);
+        const auto expectedColoredOutput = ColorDifferences(e.expectedValue, differences, blueColorSequence, DiffChange::Deletion);
+        const auto actualColoredOutput = ColorDifferences(e.actualValue, differences, redColorSequence, DiffChange::Addition);
 
         const auto length = std::max(e.expectedValue.size(), e.actualValue.size());
         const auto insertLinebreak = (length > 20);
