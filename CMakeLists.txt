@@ -16,3 +16,8 @@ if(AALTEST_BUILD_TESTS)
     add_subdirectory(Tests/AalTestTests)
     add_subdirectory(Tests/DiffTests)
 endif()
+
+option(AALTEST_BUILD_TOOLS "Enable building tools." OFF)
+if(AALTEST_BUILD_TOOLS)
+    add_subdirectory(Tools/AalTestSnapshotTool)
+endif()

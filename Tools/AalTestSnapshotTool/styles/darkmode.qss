@@ -1,0 +1,124 @@
+QWidget {
+    background-color: #2E2E2E;
+    color: #FFFFFF;
+}
+
+QPushButton {
+    background-color: #444444;
+    border: 1px solid #555555;
+    border-radius: 3px;
+    padding: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #555555;
+}
+
+QTextEdit {
+    background-color: #3C3C3C;
+    border: 2px solid #555555;
+    border-radius: 3px;
+    color: #FFFFFF;
+}
+
+QSlider {
+    background-color: #3C3C3C;
+}
+
+QMenuBar {
+    background-color: #3C3C3C;
+    color: #FFFFFF;
+}
+
+QMenuBar::item {
+    background-color: #555555;
+    color: #FFFFFF;
+    border-radius: 3px;
+    padding: 5px 10px;
+}
+
+QMenuBar::item:pressed {
+    background-color: #777777;
+}
+
+QStatusBar {
+    background-color: #3C3C3C;
+    color: #FFFFFF;
+}
+
+QHeaderView {
+    background-color: #444444;
+    color: #FFFFFF;
+    border: none;
+}
+
+QHeaderView::section {
+    background-color: #555555;
+    padding: 3px;
+    border: 1px solid #555555;
+}
+
+QTreeView {
+    background-color: #3C3C3C;
+    color: #FFFFFF;
+    alternate-background-color: #444444;
+    border-radius: 3px;
+    border: 2px solid #888888;
+}
+
+QTreeView::item {
+    padding: 5px;
+}
+
+QTreeView::item:selected {
+    background-color: #2D3B4E;
+    color: #FFFFFF;
+}
+
+QTreeView::item:hover {
+    background-color: #555555;
+            padding: 0px;
+}
+
+QTreeView::item:selected:hover {
+    background-color: #2A4B6D;
+    color: #FFFFFF;
+    padding: 5px;
+}
+
+QSplitter::handle:pressed {
+    background-color: #999999;
+}
+
+QScrollBar:horizontal,
+QScrollBar:vertical {
+    background: #444444;
+    width: 15px;
+}
+
+QScrollBar::handle:horizontal,
+QScrollBar::handle:vertical {
+    background: #555555;
+    min-height: 30px;
+}
+
+QScrollBar::handle:horizontal:hover,
+QScrollBar::handle:vertical:hover {
+    background: #777777;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal,
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QScrollBar::add-page:vertical, 
+QScrollBar::sub-page:vertical, 
+QScrollBar::add-page:horizontal, 
+QScrollBar::sub-page:horizontal {
+    background: none;
+}
