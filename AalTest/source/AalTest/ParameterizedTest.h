@@ -68,6 +68,13 @@ namespace AalTest
                     output->writeTestValueMismatchMessage(e);
                     addResult(TestResultKind::Failed);
                 }
+                catch (SnapshotCreatedTestException& e)
+                {
+                    rerunTest(parameters);
+                    output->updateTestResult(resultPosition, TestResultKind::Failed);
+                    output->writeSnapshotCreatedMessage(e);
+                    addResult(TestResultKind::Failed);
+                }
                 currentTest++;
             }
         }

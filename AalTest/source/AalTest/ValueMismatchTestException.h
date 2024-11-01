@@ -10,10 +10,21 @@ namespace AalTest
     class AALTEST_API ValueMismatchTestException : public std::exception
     {
     public:
-        ValueMismatchTestException(const QString& expected, const QString& actual, const std::source_location& sourceLocation);
+        enum class OutputMode
+        {
+            Diff,
+            All
+        };
+
+        ValueMismatchTestException(
+            const QString& expected, 
+            const QString& actual, 
+            const std::source_location& sourceLocation, 
+            OutputMode outputMode);
 
         QString expectedValue;
         QString actualValue;
         std::source_location location;
+        OutputMode outputMode;
     };
 }

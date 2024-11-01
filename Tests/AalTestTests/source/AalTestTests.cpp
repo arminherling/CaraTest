@@ -1,6 +1,9 @@
 #include "AalTestTests.h"
 #include <AalTest.h>
 
+#include <QDir>
+#include <QRandomGenerator>
+
 using namespace AalTest;
 
 namespace Simple
@@ -586,6 +589,106 @@ namespace Parameterized
     }
 }
 
+static QString GenerateRandomFilePath()
+{
+    const auto value = QRandomGenerator::global()->generate();
+    const auto testFilePath = QDir::cleanPath(QDir::tempPath() + QString("/test_file_%1.test").arg(value));
+    return testFilePath;
+}
+
+static void EqualsFileCreatesSnapshotWhenFileDoesNotExist()
+{
+    int expectedPasses = 0;
+    int expectedFails = 1;
+    int expectedSkips = 0;
+    TestRunner runner{ TestRunner::OutputMode::None };
+    TestSuite suite{};
+
+    const auto testFilePath = GenerateRandomFilePath();
+
+    suite.add(QString(), [=]()
+        {
+            AalTest::EqualsFile(QString("TestValue"), QFileInfo(testFilePath));
+        });
+    runner.run(suite);
+
+    const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
+    auto snapshotFile = QFile(snapshotFilePath);
+    
+    const auto fileExists = snapshotFile.exists();
+    const auto wasRemoved = snapshotFile.remove();
+
+    AalTest::IsTrue(fileExists);
+    AalTest::IsTrue(wasRemoved);
+    AalTest::AreEqual(expectedPasses, suite.passedTests());
+    AalTest::AreEqual(expectedFails, suite.failedTests());
+    AalTest::AreEqual(expectedSkips, suite.skippedTests());
+}
+
+static void EqualsFileDoesntCreateSnapshotWhenValuesAreEqual()
+{
+    int expectedPasses = 1;
+    int expectedFails = 0;
+    int expectedSkips = 0;
+    QString expectedValue("TestValue");
+
+    TestRunner runner{ TestRunner::OutputMode::None };
+    TestSuite suite{};
+
+    const auto testFilePath = GenerateRandomFilePath();
+    AalTest::WriteFileContent(testFilePath, expectedValue);
+
+    suite.add(QString(), [=]()
+        {
+            AalTest::EqualsFile(expectedValue, QFileInfo(testFilePath));
+        });
+    runner.run(suite);
+
+    const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
+    auto snapshotFile = QFile(snapshotFilePath);
+
+    const auto fileExists = snapshotFile.exists();
+    const auto wasRemoved = snapshotFile.remove();
+
+    AalTest::IsFalse(fileExists);
+    AalTest::IsFalse(wasRemoved);
+    AalTest::AreEqual(expectedPasses, suite.passedTests());
+    AalTest::AreEqual(expectedFails, suite.failedTests());
+    AalTest::AreEqual(expectedSkips, suite.skippedTests());
+}
+
+static void EqualsFileCreateSnapshotWhenValuesAreNotEqual()
+{
+    int expectedPasses = 0;
+    int expectedFails = 1;
+    int expectedSkips = 0;
+    QString expectedValue("TestValue");
+
+    TestRunner runner{ TestRunner::OutputMode::None };
+    TestSuite suite{};
+
+    const auto testFilePath = GenerateRandomFilePath();
+    AalTest::WriteFileContent(testFilePath, expectedValue);
+
+    suite.add(QString(), [=]()
+        {
+            AalTest::EqualsFile(QString("Some other Value"), QFileInfo(testFilePath));
+        });
+    runner.run(suite);
+
+    const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
+    auto snapshotFile = QFile(snapshotFilePath);
+
+    const auto fileExists = snapshotFile.exists();
+    const auto wasRemoved = snapshotFile.remove();
+
+    AalTest::IsTrue(fileExists);
+    AalTest::IsTrue(wasRemoved);
+    AalTest::AreEqual(expectedPasses, suite.passedTests());
+    AalTest::AreEqual(expectedFails, suite.failedTests());
+    AalTest::AreEqual(expectedSkips, suite.skippedTests());
+}
+
 TestSuite AalTestTestsSuiteSimple()
 {
     using namespace Simple;
@@ -632,7 +735,17 @@ TestSuite AalTestTestsSuiteParameterized()
     return suite;
 }
 
+TestSuite AalTestSnapshotTestsSuite()
+{
+    TestSuite suite{};
+    suite.add(QString("EqualsFileCreatesSnapshotWhenFileDoesNotExist"), EqualsFileCreatesSnapshotWhenFileDoesNotExist);
+    suite.add(QString("EqualsFileDoesntCreateSnapshotWhenValuesAreEqual"), EqualsFileDoesntCreateSnapshotWhenValuesAreEqual);
+    suite.add(QString("EqualsFileCreateSnapshotWhenValuesAreNotEqual"), EqualsFileCreateSnapshotWhenValuesAreNotEqual);
+
+    return suite;
+}
+
 QList<TestSuite> AalTestTestsSuite()
 {
-    return QList<TestSuite>() << AalTestTestsSuiteSimple() << AalTestTestsSuiteParameterized();
+    return QList<TestSuite>() << AalTestTestsSuiteSimple() << AalTestTestsSuiteParameterized() << AalTestSnapshotTestsSuite();
 }

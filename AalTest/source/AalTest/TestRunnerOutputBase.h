@@ -5,6 +5,7 @@
 #include <AalTest/TestResult.h>
 #include <AalTest/TestSuiteResult.h>
 #include <AalTest/ValueMismatchTestException.h>
+#include <AalTest/SnapshotCreatedTestException.h>
 #include <QList>
 #include <QPoint>
 
@@ -21,6 +22,7 @@ namespace AalTest
         virtual void writeTestSkippedMessage(SkipTestException& e) = 0;
         virtual void writeTestFailedMessage(FailedTestException& e) = 0;
         virtual void writeTestValueMismatchMessage(ValueMismatchTestException& e) = 0;
+        virtual void writeSnapshotCreatedMessage(SnapshotCreatedTestException& e) = 0;
         virtual void writeTestRunnerResult(const TestSuiteResult& result) = 0;
         virtual void writeTestRunnerTotalResult(const QList<TestSuiteResult>& results) = 0;
         virtual void writeEmptyLine() = 0;

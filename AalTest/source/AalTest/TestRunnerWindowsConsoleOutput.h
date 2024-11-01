@@ -17,6 +17,7 @@ namespace AalTest
         void writeTestSkippedMessage(SkipTestException& e) override;
         void writeTestFailedMessage(FailedTestException& e) override;
         void writeTestValueMismatchMessage(ValueMismatchTestException& e) override;
+        void writeSnapshotCreatedMessage(SnapshotCreatedTestException& e) override;
         void writeTestRunnerResult(const TestSuiteResult& result) override;
         void writeTestRunnerTotalResult(const QList<TestSuiteResult>& results) override;
         void writeEmptyLine() override;

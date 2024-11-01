@@ -244,6 +244,11 @@ namespace AalTest
         std::cout << actualColoredOutput.toStdString() << '\n';
     }
 
+    void TestRunnerWindowsConsoleOutput::writeSnapshotCreatedMessage(SnapshotCreatedTestException& e)
+    {
+        std::cout << orangeColorSequence.toStdString() << "   Snapshot created: "<< resetAttributes.toStdString()  << e.filePath.toStdString() << '\n';
+    }
+
     void TestRunnerWindowsConsoleOutput::writeTestRunnerResult(const TestSuiteResult& result)
     {
         std::cout
