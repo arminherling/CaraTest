@@ -25,7 +25,7 @@ namespace AalTest
         if (expectedValue != actualValue)
         {
             HANDLE_AALTEST_FAILURE();
-            throw ValueMismatchTestException(Stringify(expectedValue), Stringify(actualValue), location, ValueMismatchTestException::OutputMode::Diff);
+            throw ValueMismatchTestException(Stringify(expectedValue, true), Stringify(actualValue, true), location, ValueMismatchTestException::OutputMode::Diff);
         }
     }
 
@@ -40,7 +40,7 @@ namespace AalTest
             WriteFileContent(snapshotFilePath, stringifiedExpectedValue);
 
             HANDLE_AALTEST_FAILURE();
-            throw SnapshotCreatedTestException(snapshotFilePath, location);
+            throw SnapshotCreatedTestException(Stringify(expectedValue, true), QString(), snapshotFilePath, location);
         }
 
         const auto fileContent = ReadFileContent(filePath);
@@ -50,7 +50,7 @@ namespace AalTest
             WriteFileContent(snapshotFilePath, stringifiedExpectedValue);
 
             HANDLE_AALTEST_FAILURE();
-            throw SnapshotCreatedTestException(snapshotFilePath, location);
+            throw SnapshotCreatedTestException(Stringify(expectedValue, true), Stringify(fileContent, true), snapshotFilePath, location);
         }
     }
 }

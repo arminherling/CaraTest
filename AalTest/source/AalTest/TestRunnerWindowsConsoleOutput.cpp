@@ -79,8 +79,16 @@ namespace
                 parts.prepend(input.mid(endIndex, lastIndex - endIndex));
 
                 auto diffString = input.mid(diff.startIndex, endIndex - diff.startIndex);
-                // we need to reset the console attributes and reapply after the linebreak to prevent a visual bug
-                diffString.replace(lineBreakRegex, diffLineBreak);
+                
+                if (diffString == '\r')
+                {
+                    lastIndex = diff.startIndex;
+                    return;
+                }
+                else if (diffString == '\n')
+                {
+                    diffString = diffLineBreak;
+                }
 
                 parts.prepend(resetAttributes);
                 parts.prepend(diffString);
@@ -120,6 +128,41 @@ namespace
         differences.append(DiffLocation{ .startIndex = 0, .endIndex = secondLength, .change = DiffChange::Deletion });
 
         return differences;
+    }
+
+    void PrintDiff(
+        const QString& expectedValue,
+        const QString& actualValue,
+        const std::source_location& location,
+        ValueMismatchTestException::OutputMode outputMode)
+    {
+        std::cout << " " << location.file_name() << " Line:" << location.line() << '\n';
+
+        QList<DiffLocation> differences;
+        if (outputMode == ValueMismatchTestException::OutputMode::Diff)
+        {
+            differences = Diff(expectedValue, actualValue);
+        }
+        else
+        {
+            differences = DiffAll(expectedValue, actualValue);
+        }
+
+        const auto expectedColoredOutput = ColorDifferences(expectedValue, differences, blueColorSequence, DiffChange::Deletion);
+        const auto actualColoredOutput = ColorDifferences(actualValue, differences, redColorSequence, DiffChange::Addition);
+
+        const auto length = std::max(expectedValue.size(), actualValue.size());
+        const auto insertLinebreak = (length > 20);
+
+        std::cout << "   Expected: ";
+        if (insertLinebreak)
+            std::cout << '\n';
+        std::cout << expectedColoredOutput.toStdString() << '\n';
+
+        std::cout << "   But got:  ";
+        if (insertLinebreak)
+            std::cout << '\n';
+        std::cout << actualColoredOutput.toStdString() << '\n';
     }
 }
 
@@ -193,7 +236,7 @@ namespace AalTest
 
         const auto oldPosition = CurrentCursorPosition(m_consoleHandle);
 
-        const auto cursorPosition = COORD{ (short)position.x(), (short)position.y()};
+        const auto cursorPosition = COORD{ (short)position.x(), (short)position.y() };
         SetConsoleCursorPosition(m_consoleHandle, cursorPosition);
 
         std::cout << StringifyTestResult(result).toStdString() << std::flush;
@@ -215,38 +258,14 @@ namespace AalTest
 
     void TestRunnerWindowsConsoleOutput::writeTestValueMismatchMessage(ValueMismatchTestException& e)
     {
-        std::cout << " " << e.location.file_name() << " Line:" << e.location.line() << '\n';
-
-        QList<DiffLocation> differences;
-        if (e.outputMode == ValueMismatchTestException::OutputMode::Diff)
-        {
-            differences = Diff(e.expectedValue, e.actualValue);
-        }
-        else
-        {
-            differences = DiffAll(e.expectedValue, e.actualValue);
-        }
-
-        const auto expectedColoredOutput = ColorDifferences(e.expectedValue, differences, blueColorSequence, DiffChange::Deletion);
-        const auto actualColoredOutput = ColorDifferences(e.actualValue, differences, redColorSequence, DiffChange::Addition);
-
-        const auto length = std::max(e.expectedValue.size(), e.actualValue.size());
-        const auto insertLinebreak = (length > 20);
-
-        std::cout << "   Expected: ";
-        if (insertLinebreak)
-            std::cout << '\n';
-        std::cout << expectedColoredOutput.toStdString() << '\n';
-
-        std::cout << "   But got:  ";
-        if (insertLinebreak)
-            std::cout << '\n';
-        std::cout << actualColoredOutput.toStdString() << '\n';
+        PrintDiff(e.expectedValue, e.actualValue, e.location, e.outputMode);
     }
 
     void TestRunnerWindowsConsoleOutput::writeSnapshotCreatedMessage(SnapshotCreatedTestException& e)
     {
-        std::cout << orangeColorSequence.toStdString() << "   Snapshot created: "<< resetAttributes.toStdString()  << e.filePath.toStdString() << '\n';
+        PrintDiff(e.expectedValue, e.actualValue, e.location, ValueMismatchTestException::OutputMode::Diff);
+
+        std::cout << '\n' << orangeColorSequence.toStdString() << "   Snapshot created: " << resetAttributes.toStdString() << e.filePath.toStdString() << '\n';
     }
 
     void TestRunnerWindowsConsoleOutput::writeTestRunnerResult(const TestSuiteResult& result)

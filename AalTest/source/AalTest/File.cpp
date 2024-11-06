@@ -14,15 +14,15 @@ namespace AalTest
     {
         const auto filePath = fileInfo.absoluteFilePath();
         auto file = QFile(filePath);
-        file.open(QIODevice::ReadOnly | QIODevice::Text);
-        return QString::fromUtf8(file.readAll());
+        file.open(QIODevice::ReadOnly);
+        return QString(file.readAll());
     }
 
     bool WriteFileContent(const QString& filePath, const QString& content)
     {
         const auto cleanedFilePath = QDir::cleanPath(filePath);
         auto file = QFile(cleanedFilePath);
-        const auto isOpen = file.open(QIODevice::WriteOnly | QIODevice::Text);
+        const auto isOpen = file.open(QIODevice::WriteOnly);
         if (!isOpen)
         {
             return false;

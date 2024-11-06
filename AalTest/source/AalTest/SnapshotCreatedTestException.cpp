@@ -3,9 +3,13 @@
 namespace AalTest
 {
     SnapshotCreatedTestException::SnapshotCreatedTestException(
+        const QString& expected,
+        const QString& actual,
         const QString& filePath,
         const std::source_location& sourceLocation)
-        : filePath{ filePath }
+        : expectedValue{ expected }
+        , actualValue{ actual }
+        , filePath{ filePath }
         , location{ sourceLocation }
     {
     }
