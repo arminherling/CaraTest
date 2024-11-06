@@ -23,12 +23,27 @@ static QList<std::tuple<QString, QString, QList<DiffLocation>>> DiffTest_Data()
         std::make_tuple(QString(), QString(), QList<DiffLocation>()),
         std::make_tuple(QString(""), QString(""), QList<DiffLocation>()),
         std::make_tuple(QString("x"), QString("x"), QList<DiffLocation>()),
-        std::make_tuple(QString("x"), QString("y"), QList<DiffLocation>{ DiffLocation{.startIndex = 0, .endIndex = 1} }),
-        std::make_tuple(QString("abc123"), QString("abc789"), QList<DiffLocation>{ DiffLocation{.startIndex = 3, .endIndex = 6} }),
+        std::make_tuple(QString("x"), QString("y"), QList<DiffLocation>{
+            DiffLocation{.startIndex = 0, .endIndex = 0, .change = DiffChange::Deletion},
+            DiffLocation{.startIndex = 0, .endIndex = 0, .change = DiffChange::Addition}
+        }),
+        std::make_tuple(QString("abc123"), QString("abc789"), QList<DiffLocation>{
+            DiffLocation{.startIndex = 3, .endIndex = 3, .change = DiffChange::Deletion},
+            DiffLocation{.startIndex = 4, .endIndex = 4, .change = DiffChange::Deletion},
+            DiffLocation{.startIndex = 5, .endIndex = 5, .change = DiffChange::Deletion},
+            DiffLocation{.startIndex = 3, .endIndex = 3, .change = DiffChange::Addition},
+            DiffLocation{.startIndex = 4, .endIndex = 4, .change = DiffChange::Addition},
+            DiffLocation{.startIndex = 5, .endIndex = 5, .change = DiffChange::Addition}
+    }),
         std::make_tuple(
             QString("enum Values \n{\n    First\n    Second\n    Third\n}\n"),
             QString("enum Values \n{\n    First\n    Second = 3\n    Third\n}\n"),
-            QList<DiffLocation>{ DiffLocation{.startIndex = 35, .endIndex = 52} }),
+            QList<DiffLocation>{
+                DiffLocation{.startIndex = 35, .endIndex = 35, .change = DiffChange::Addition},
+                DiffLocation{.startIndex = 36, .endIndex = 36, .change = DiffChange::Addition},
+                DiffLocation{.startIndex = 37, .endIndex = 37, .change = DiffChange::Addition},
+                DiffLocation{.startIndex = 38, .endIndex = 38, .change = DiffChange::Addition}
+            }),
         std::make_tuple(
 QString(R"(enum Values 
 {
@@ -43,7 +58,13 @@ QString(R"(enum Values
     Second = 3
     Third
 }
-)"), QList<DiffLocation>{ DiffLocation{.startIndex = 35, .endIndex = 52} }),
+)"),
+    QList<DiffLocation>{
+        DiffLocation{.startIndex = 35, .endIndex = 35, .change = DiffChange::Addition},
+        DiffLocation{.startIndex = 36, .endIndex = 36, .change = DiffChange::Addition},
+        DiffLocation{.startIndex = 37, .endIndex = 37, .change = DiffChange::Addition},
+        DiffLocation{.startIndex = 38, .endIndex = 38, .change = DiffChange::Addition}
+    }),
     };
 }
 

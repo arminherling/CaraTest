@@ -14,7 +14,7 @@ namespace AalTest
     {
         const auto filePath = fileInfo.absoluteFilePath();
         auto file = QFile(filePath);
-        file.open(QIODevice::ReadOnly);
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
         return QString::fromUtf8(file.readAll());
     }
 
@@ -29,6 +29,8 @@ namespace AalTest
         }
 
         QTextStream stream(&file);
+        stream.setEncoding(QStringConverter::Utf8);
+        stream.setGenerateByteOrderMark(true);
         stream << content;
         file.close();
 

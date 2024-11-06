@@ -3,37 +3,43 @@
 
 namespace AalTest
 {
-    QString Stringify(bool value)
+    QString Stringify(bool value, bool quoteStrings)
     {
         return value ? QString("true") : QString("false");
     }
 
-    QString Stringify(int value)
+    QString Stringify(int value, bool quoteStrings)
     {
         return QString::number(value);
     }
 
-    QString Stringify(long long value)
+    QString Stringify(long long value, bool quoteStrings)
     {
         return QString::number(value);
     }
 
-    QString Stringify(const char* str)
+    QString Stringify(const char* str, bool quoteStrings)
     {
-        return QString("\"%1\"").arg(QString::fromLocal8Bit(str));
+        if (quoteStrings)
+            return QString("\"%1\"").arg(QString::fromLocal8Bit(str));
+        else
+            return QString::fromLocal8Bit(str);        
     }
 
-    QString Stringify(const QString& string)
+    QString Stringify(const QString& string, bool quoteStrings)
     {
-        return QString("\"%1\"").arg(string);
+        if (quoteStrings)
+            return QString("\"%1\"").arg(string);
+        else
+            return string;
     }
 
-    QString Stringify(const QStringView stringView)
+    QString Stringify(const QStringView stringView, bool quoteStrings)
     {
-        return Stringify(stringView.toString());
+        return Stringify(stringView.toString(), quoteStrings);
     }
 
-    QString Stringify(const std::chrono::nanoseconds& input)
+    QString Stringify(const std::chrono::nanoseconds& input, bool quoteStrings)
     {
         auto ns = input;
 

@@ -7,24 +7,24 @@
 
 namespace AalTest
 {
-    AALTEST_API QString Stringify(bool value);
-    AALTEST_API QString Stringify(int value);
-    AALTEST_API QString Stringify(long long value);
-    AALTEST_API QString Stringify(const char* str);
-    AALTEST_API QString Stringify(const QString& string);
-    AALTEST_API QString Stringify(const QStringView stringView);
-    AALTEST_API QString Stringify(const std::chrono::nanoseconds& ns);
+    AALTEST_API QString Stringify(bool value, bool quoteStrings = false);
+    AALTEST_API QString Stringify(int value, bool quoteStrings = false);
+    AALTEST_API QString Stringify(long long value, bool quoteStrings = false);
+    AALTEST_API QString Stringify(const char* str, bool quoteStrings = false);
+    AALTEST_API QString Stringify(const QString& string, bool quoteStrings = false);
+    AALTEST_API QString Stringify(const QStringView stringView, bool quoteStrings = false);
+    AALTEST_API QString Stringify(const std::chrono::nanoseconds& ns, bool quoteStrings = false);
 
     template<class T>
-    QString Stringify(T t)
+    QString Stringify(T t, bool quoteStrings = false)
     {
         return QString("?");
     }
 
     template<class ...Ts>
-    QString Stringify(const std::tuple<Ts...>& tuple)
+    QString Stringify(const std::tuple<Ts...>& tuple, bool quoteStrings = false)
     {
-        auto converter = [](const auto& ...args) { return QStringList{ Stringify(args)... }; };
+        auto converter = [quoteStrings](const auto& ...args) { return QStringList{ Stringify(args, quoteStrings)... }; };
         auto parts = std::apply(converter, tuple);
         return QString("(%1)").arg(parts.join(", "));
     }

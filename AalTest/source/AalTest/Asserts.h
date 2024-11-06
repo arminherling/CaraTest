@@ -32,7 +32,7 @@ namespace AalTest
     template<class T1>
     void EqualsFile(T1&& expectedValue, const QFileInfo& filePath, const std::source_location& location = std::source_location::current())
     {
-        const auto stringifiedExpectedValue = Stringify(expectedValue);
+        const auto stringifiedExpectedValue = Stringify(expectedValue, false);
 
         if (!filePath.exists())
         {
