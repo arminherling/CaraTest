@@ -42,6 +42,7 @@ private:
     void onAcceptClicked();
     void onCurrentDisplayedFileChanged(const QString& filePath);
     void selectDirectoryToWatch();
+    void setDirectoryToWatch(const QString& dirPath);
     void clearPreviews();
     void clearSelectedSnapshotWatcher();
     void updateHighlighters();

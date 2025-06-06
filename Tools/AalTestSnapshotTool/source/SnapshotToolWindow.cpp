@@ -5,6 +5,9 @@
 #include <AalTest/File.h>
 
 #include <QtCore/QFileSystemWatcher>
+#include <QtCore/QStandardPaths>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
 
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
@@ -44,6 +47,40 @@ namespace
         const auto completeBaseName = fileInfo.completeBaseName();
         const auto originPath = directory.filePath(completeBaseName);
         return QFileInfo(originPath);
+    }
+
+    static QString GetSettingsFilePath()
+    {
+        const auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        QDir().mkpath(appDataDir); // Ensure the directory exists
+
+        const auto filePath = QDir(appDataDir).filePath("snapshot_tool_settings.json");
+        return filePath;
+    }
+
+    static QString LoadLastDirectory()
+    {
+        const auto fileContent = AalTest::ReadFileContent(GetSettingsFilePath());
+        if (fileContent.isEmpty())
+            return {};
+
+        const auto jsonDocument = QJsonDocument::fromJson(fileContent.toUtf8());
+        if (!jsonDocument.isObject())
+            return {};
+
+        const auto jsonObject = jsonDocument.object();
+        return jsonObject.value("lastDirectory").toString();
+    }
+
+    static void SaveLastDirectory(const QString& dirPath)
+    {
+        QJsonObject jsonObject{};
+        jsonObject["lastDirectory"] = dirPath;
+        QJsonDocument jsonDocument(jsonObject);
+
+        const auto settingsFilePath = GetSettingsFilePath();
+        const auto jsonContent = jsonDocument.toJson(QJsonDocument::Indented);
+        AalTest::WriteFileContent(settingsFilePath, jsonContent);
     }
 }
 
@@ -150,15 +187,30 @@ void SnapshotToolWindow::showEvent(QShowEvent* event)
         return;
 
     firstShowEvent = false;
-    selectDirectoryToWatch();
+
+    const auto lastDirectory = LoadLastDirectory();
+    if (!lastDirectory.isEmpty() && QDir(lastDirectory).exists())
+    {
+        setDirectoryToWatch(lastDirectory);
+    }
+    else
+    {
+        selectDirectoryToWatch();
+    }
 }
 
 void SnapshotToolWindow::selectDirectoryToWatch()
 {
-    auto dirPath = QFileDialog::getExistingDirectory();
+    const auto dirPath = QFileDialog::getExistingDirectory(this, "Select Directory");
     if (dirPath.isNull())
         return;
 
+    setDirectoryToWatch(dirPath);
+    SaveLastDirectory(dirPath);
+}
+
+void SnapshotToolWindow::setDirectoryToWatch(const QString& dirPath)
+{
     clearPreviews();
     m_snapshotFileTree->clearSelection();
 
