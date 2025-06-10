@@ -4,11 +4,11 @@ set(CMAKE_VS_JUST_MY_CODE_DEBUGGING ON)
 
 qt_add_executable(
     ${PROJECT_NAME} 
-    "${PROJECT_SOURCE_DIR}/../AalTestTests/source/AalTestTests.cpp"
+    "${PROJECT_SOURCE_DIR}/../CaraTestTests/source/CaraTestTests.cpp"
     "${PROJECT_SOURCE_DIR}/../DiffTests/source/DiffTests.cpp"
     "source/main.cpp")
 
-target_link_libraries(${PROJECT_NAME} PRIVATE AalTest Qt6::Core)
+target_link_libraries(${PROJECT_NAME} PRIVATE CaraTest Qt6::Core)
 
 if (WIN32)
     add_custom_command(

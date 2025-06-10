@@ -1,4 +1,4 @@
-# AalTest
+# CaraTest
 
 ## Description
 Very basic test framework that I made for [Aalenian](https://github.com/arminherling/Aalenian), because QTest didn't support printing the combined results of multiple TestSuits without ugly hacks.

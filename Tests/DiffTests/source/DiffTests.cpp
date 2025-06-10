@@ -1,9 +1,9 @@
 #include "DiffTests.h"
-#include <AalTest.h>
-#include <AalTest/Diff.h>
+#include <CaraTest.h>
+#include <CaraTest/Diff.h>
 #include <tuple>
 
-using namespace AalTest;
+using namespace CaraTest;
 
 static void DiffTest(const QString& first, const QString& second, const QList<DiffLocation>& expectedDifferences)
 {

@@ -1,10 +1,10 @@
 #include <CaraTest.h>
-#include "DiffTests.h"
+#include "CaraTestTests.h"
 
 int main(int argc, char* argv[])
 {
     CaraTest::TestRunner runner{argc, argv};
-    auto testSuites = DiffTestsSuite();
+    auto testSuites = CaraTestTestsSuite();
 
     runner.run(testSuites);
 

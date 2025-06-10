@@ -1,14 +1,14 @@
-#include <AalTest.h>
-#include "../../AalTestTests/source/AalTestTests.h"
+#include <CaraTest.h>
+#include "../../CaraTestTests/source/CaraTestTests.h"
 #include "../../DiffTests/source/DiffTests.h"
 
-using namespace AalTest;
+using namespace CaraTest;
 
 int main()
 {
     TestRunner runner{};
     QList<TestSuite> testSuites{};
-    testSuites << AalTestTestsSuite();
+    testSuites << CaraTestTestsSuite();
     testSuites << DiffTestsSuite();
 
     runner.run(testSuites);
