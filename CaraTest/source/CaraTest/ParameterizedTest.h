@@ -97,7 +97,7 @@ namespace CaraTest
         template<typename TPara>
         void rerunTest(const TPara& parameters) const
         {
-            if (g_caraTestFailureBehavior == FailureBehavior::DebugBreakAndRerun)
+            if (GetFailureBehavior() == FailureBehavior::DebugBreakAndRerun)
             {
                 try
                 {

@@ -78,7 +78,7 @@ namespace CaraTest
     private:
         void rerunTest() const
         {
-            if (g_caraTestFailureBehavior == FailureBehavior::DebugBreakAndRerun)
+            if (GetFailureBehavior() == FailureBehavior::DebugBreakAndRerun)
             {
                 try
                 {

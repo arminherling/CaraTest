@@ -4,9 +4,9 @@
 
 using namespace CaraTest;
 
-int main()
+int main(int argc, char* argv[])
 {
-    TestRunner runner{};
+    TestRunner runner{ argc, argv };
     QList<TestSuite> testSuites{};
     testSuites << CaraTestTestsSuite();
     testSuites << DiffTestsSuite();

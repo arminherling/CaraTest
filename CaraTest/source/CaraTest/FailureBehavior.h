@@ -11,16 +11,17 @@ namespace CaraTest
         DebugBreakAndRerun
     };
 
+    CARATEST_API FailureBehavior GetFailureBehavior();
+    CARATEST_API void SetFailureBehavior(FailureBehavior value);
 }
-extern "C" CARATEST_API CaraTest::FailureBehavior g_caraTestFailureBehavior;
 
-#define TRIGGER_DEBUG_BREAK()                                                   \
+#define TRIGGER_DEBUG_BREAK()                                                       \
     __debugbreak();
 
-#define HANDLE_CARATEST_FAILURE()                                                \
-    do {                                                                        \
-        if(g_caraTestFailureBehavior == FailureBehavior::DebugBreak)             \
-        {                                                                       \
-           TRIGGER_DEBUG_BREAK();                                               \
-        }                                                                       \
+#define HANDLE_CARATEST_FAILURE()                                                   \
+    do {                                                                            \
+        if(CaraTest::GetFailureBehavior() == CaraTest::FailureBehavior::DebugBreak) \
+        {                                                                           \
+           TRIGGER_DEBUG_BREAK();                                                   \
+        }                                                                           \
     } while(false)
