@@ -18,7 +18,6 @@ namespace CaraTest
         };
 
         TestRunner(int argc, char* argv[], OutputMode output = OutputMode::WindowsConsole);
-        TestRunner(OutputMode output = OutputMode::WindowsConsole);
 
         void run(const TestSuite& suite);
         void run(const QList<TestSuite>& suites);

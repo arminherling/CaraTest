@@ -44,14 +44,9 @@ namespace
 namespace CaraTest
 {
     TestRunner::TestRunner(int argc, char* argv[], OutputMode output)
-        : TestRunner{ output }
-    {
-        ParseAndSetFailureBehavior(argc, argv);
-    }
-
-    TestRunner::TestRunner(OutputMode output)
         : m_output{ CreateOutput(output) }
     {
+        ParseAndSetFailureBehavior(argc, argv);
     }
 
     void TestRunner::run(const TestSuite& suite)
