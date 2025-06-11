@@ -25,22 +25,26 @@ namespace CaraTest
         if (expectedValue != actualValue)
         {
             HANDLE_CARATEST_FAILURE();
-            throw ValueMismatchTestException(Stringify(expectedValue, true), Stringify(actualValue, true), location, ValueMismatchTestException::OutputMode::Diff);
+            throw ValueMismatchTestException(
+                StringifyAndMaybeQuote(expectedValue),
+                StringifyAndMaybeQuote(actualValue),
+                location,
+                ValueMismatchTestException::OutputMode::Diff
+            );
         }
     }
 
     template<class T1>
     void EqualsFile(const QFileInfo& expectedContentFilePath, T1&& actualValue, const std::source_location& location = std::source_location::current())
     {
-        const auto stringifiedActualValue = Stringify(actualValue, false);
-
+        const auto stringifiedActualValue = Stringify(actualValue);
         if (!expectedContentFilePath.exists())
         {
             const auto snapshotFilePath = QDir::cleanPath(expectedContentFilePath.absoluteFilePath() + QString(".snapshot"));
             File::WriteContent(snapshotFilePath, stringifiedActualValue);
 
             HANDLE_CARATEST_FAILURE();
-            throw SnapshotCreatedTestException(Stringify(actualValue, true), QString(), snapshotFilePath, location);
+            throw SnapshotCreatedTestException(QString(), StringifyAndMaybeQuote(actualValue), snapshotFilePath, location);
         }
 
         const auto fileContent = File::ReadContent(expectedContentFilePath);
@@ -50,7 +54,7 @@ namespace CaraTest
             File::WriteContent(snapshotFilePath, stringifiedActualValue);
 
             HANDLE_CARATEST_FAILURE();
-            throw SnapshotCreatedTestException(Stringify(actualValue, true), Stringify(fileContent, true), snapshotFilePath, location);
+            throw SnapshotCreatedTestException(StringifyAndMaybeQuote(fileContent), StringifyAndMaybeQuote(actualValue), snapshotFilePath, location);
         }
     }
 }

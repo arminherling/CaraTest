@@ -3,43 +3,37 @@
 
 namespace CaraTest
 {
-    QString Stringify(bool value, bool quoteStrings)
+    QString Stringify(bool value)
     {
         return value ? QString("true") : QString("false");
     }
 
-    QString Stringify(int value, bool quoteStrings)
+    QString Stringify(int value)
     {
         return QString::number(value);
     }
 
-    QString Stringify(long long value, bool quoteStrings)
+    QString Stringify(long long value)
     {
         return QString::number(value);
     }
 
-    QString Stringify(const char* str, bool quoteStrings)
+    QString Stringify(const char* str)
     {
-        if (quoteStrings)
-            return QString("\"%1\"").arg(QString::fromLocal8Bit(str));
-        else
-            return QString::fromLocal8Bit(str);        
+        return QString::fromLocal8Bit(str);        
     }
 
-    QString Stringify(const QString& string, bool quoteStrings)
+    QString Stringify(const QString& string)
     {
-        if (quoteStrings)
-            return QString("\"%1\"").arg(string);
-        else
-            return string;
+        return string;
     }
 
-    QString Stringify(const QStringView stringView, bool quoteStrings)
+    QString Stringify(const QStringView stringView)
     {
-        return Stringify(stringView.toString(), quoteStrings);
+        return stringView.toString();
     }
 
-    QString Stringify(const std::chrono::nanoseconds& input, bool quoteStrings)
+    QString Stringify(const std::chrono::nanoseconds& input)
     {
         auto ns = input;
 
@@ -61,6 +55,26 @@ namespace CaraTest
         stream << QString::number(ns.count()).rightJustified(3, '0') << QString("ns");
 
         return output;
+    }
+
+    QString StringifyAndQuoted(const char* str)
+    {
+        return QString("\"%1\"").arg(QString::fromLocal8Bit(str));
+    }
+
+    QString StringifyAndQuoted(const QString& string)
+    {
+        return QString("\"%1\"").arg(string);
+    }
+
+    QString StringifyAndQuoted(const QStringView stringView)
+    {
+        return StringifyAndQuoted(stringView.toString());
+    }
+
+    QString StringifyAndQuoted(const std::string& string)
+    {
+        return QString("\"%1\"").arg(QString::fromStdString(string));
     }
 
     QString Sanitize(QString input)

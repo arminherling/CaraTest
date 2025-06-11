@@ -39,7 +39,7 @@ namespace CaraTest
                 QPoint resultPosition;
                 try
                 {
-                    const auto stringifiedParameters = Sanitize(Stringify(parameters, true));
+                    const auto stringifiedParameters = Sanitize(StringifyAndMaybeQuote(parameters));
                     resultPosition = output->writeSubTestHeader(headerIndentation, currentTest, totalSubTestCount, stringifiedParameters);
 
                     std::apply(m_function, parameters);
