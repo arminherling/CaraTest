@@ -32,9 +32,26 @@ jobs:
             cpp_compiler: g++
           - os: ubuntu-latest
             cpp_compiler: clang++
+        exclude:
+          - os: ubuntu-latest
+            cpp_compiler: cl      
 
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Install Qt (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qt6-base-dev qt6-base-dev-tools qt6-core-dev
+
+    - name: Install Qt (Windows)
+      if: runner.os == 'Windows'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: 6.6.0
+        modules: 'qtbase,qt6core'
+        cache: true
 
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
@@ -49,7 +66,6 @@ jobs:
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
