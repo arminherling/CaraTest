@@ -1,4 +1,4 @@
-﻿#include "TestRunnerWindowsConsoleOutput.h"
+﻿#include "TestRunnerConsoleOutput.h"
 #include <CaraTest/Stringify.h>
 #include <CaraTest/Diff.h>
 
@@ -7,8 +7,64 @@
 #include <algorithm>
 #include <iostream>
 
+#if defined(_MSC_VER)
+
+namespace 
+{
 #define NOMINMAX
 #include <Windows.h>
+
+    void* g_windowConsoleHandle = nullptr;
+
+    int SetupConsole()
+    {
+        g_windowConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        SetConsoleOutputCP(CP_UTF8);
+        SetConsoleMode(g_windowConsoleHandle, ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo{};
+        GetConsoleScreenBufferInfo(g_windowConsoleHandle, &screenBufferInfo);
+        const auto consoleWidth = screenBufferInfo.dwSize.X;
+        return consoleWidth - 12;
+    }
+
+    QPoint CurrentCursorPosition()
+    {
+        CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
+        GetConsoleScreenBufferInfo(g_windowConsoleHandle, &screenBuffer);
+        return QPoint(screenBuffer.dwCursorPosition.X, screenBuffer.dwCursorPosition.Y);
+    }
+
+    void MoveCursorToPosition(const QPoint& position)
+    {
+        COORD coord{ static_cast<SHORT>(position.x()), static_cast<SHORT>(position.y()) };
+        SetConsoleCursorPosition(g_windowConsoleHandle, coord);
+    }
+}
+
+#elif defined(__GNUC__) || defined(__clang__)
+
+namespace
+{
+    int SetupConsole()
+    {
+        return 50;
+    }
+
+    QPoint CurrentCursorPosition()
+    {
+        return QPoint();
+    }
+
+    void MoveCursorToPosition(const QPoint& position)
+    {
+    }
+}
+
+#else
+#define TRIGGER_DEBUG_BREAK() static_assert(false, "Console output not supported yet");
+#endif
+
 
 namespace
 {
@@ -104,13 +160,6 @@ namespace
         return parts.join(QString());
     }
 
-    COORD CurrentCursorPosition(void* consoleHandle)
-    {
-        CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
-        GetConsoleScreenBufferInfo(consoleHandle, &screenBuffer);
-        return screenBuffer.dwCursorPosition;
-    }
-
     QList<DiffLocation> DiffAll(const QString& first, const QString& second)
     {
         QList<DiffLocation> differences;
@@ -168,19 +217,12 @@ namespace
 
 namespace CaraTest
 {
-    TestRunnerWindowsConsoleOutput::TestRunnerWindowsConsoleOutput()
-        : m_consoleHandle{ GetStdHandle(STD_OUTPUT_HANDLE) }
-        , m_oldConsoleOutputCodePage{ GetConsoleOutputCP() }
+    TestRunnerConsoleOutput::TestRunnerConsoleOutput()
     {
-        SetConsoleOutputCP(CP_UTF8);
-        SetConsoleMode(m_consoleHandle, ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo{};
-        GetConsoleScreenBufferInfo(m_consoleHandle, &screenBufferInfo);
-        const auto consoleWidth = screenBufferInfo.dwSize.X;
-        m_headerSize = consoleWidth - 12;
+        m_headerSize = SetupConsole();
     }
 
-    void TestRunnerWindowsConsoleOutput::writeSuiteName(const QString& name)
+    void TestRunnerConsoleOutput::writeSuiteName(const QString& name)
     {
         if (name.isEmpty())
             return;
@@ -188,7 +230,7 @@ namespace CaraTest
         std::cout << "         --== " << name.toStdString() << " ==--\n";
     }
 
-    QPoint TestRunnerWindowsConsoleOutput::writeTestHeader(int currentTest, int totalTests, const QString& testName, bool hasSubTests)
+    QPoint TestRunnerConsoleOutput::writeTestHeader(int currentTest, int totalTests, const QString& testName, bool hasSubTests)
     {
         std::cout << " " << TestNumber(currentTest, totalTests, !hasSubTests);
         if (hasSubTests)
@@ -199,14 +241,14 @@ namespace CaraTest
 
         std::cout << " " << testName.leftJustified(m_headerSize, '.').toStdString() << " " << std::flush;
 
-        const auto cursorPosition = CurrentCursorPosition(m_consoleHandle);
+        const auto cursorPosition = CurrentCursorPosition();
 
         std::cout << "....\n";
 
-        return { cursorPosition.X, cursorPosition.Y };
+        return cursorPosition;
     }
 
-    QPoint TestRunnerWindowsConsoleOutput::writeSubTestHeader(int indentation, int currentTest, int totalTests, const QString& parameters)
+    QPoint TestRunnerConsoleOutput::writeSubTestHeader(int indentation, int currentTest, int totalTests, const QString& parameters)
     {
         const auto indent = QString(" ").repeated(indentation + 2);
 
@@ -220,55 +262,57 @@ namespace CaraTest
 
         std::cout << indent.toStdString() << testNumber << " - " << truncatedParameters.leftJustified(headerSize, '.').toStdString() << " " << std::flush;
 
-        const auto cursorPosition = CurrentCursorPosition(m_consoleHandle);
+        const auto cursorPosition = CurrentCursorPosition();
 
         std::cout << "....\n";
 
-        return { cursorPosition.X, cursorPosition.Y };
+        return cursorPosition;
     }
 
-    void TestRunnerWindowsConsoleOutput::updateTestResult(const QPoint& position, TestResultKind result)
+    void TestRunnerConsoleOutput::updateTestResult(const QPoint& position, TestResultKind result)
     {
         std::cout << std::flush;
 
         if (position.isNull())
             return;
 
-        const auto oldPosition = CurrentCursorPosition(m_consoleHandle);
+        const auto oldPosition = CurrentCursorPosition();
 
-        const auto cursorPosition = COORD{ (short)position.x(), (short)position.y() };
-        SetConsoleCursorPosition(m_consoleHandle, cursorPosition);
+        //const auto cursorPosition = COORD{ (short)position.x(), (short)position.y() };
+        //SetConsoleCursorPosition(m_consoleHandle, cursorPosition);
+        MoveCursorToPosition(position);
 
         std::cout << StringifyTestResult(result).toStdString() << std::flush;
 
-        SetConsoleCursorPosition(m_consoleHandle, oldPosition);
+        //SetConsoleCursorPosition(m_consoleHandle, oldPosition);
+        MoveCursorToPosition(oldPosition);
     }
 
-    void TestRunnerWindowsConsoleOutput::writeTestPassedMessage()
+    void TestRunnerConsoleOutput::writeTestPassedMessage()
     {
     }
 
-    void TestRunnerWindowsConsoleOutput::writeTestSkippedMessage(SkipTestException& e)
+    void TestRunnerConsoleOutput::writeTestSkippedMessage(SkipTestException& e)
     {
     }
 
-    void TestRunnerWindowsConsoleOutput::writeTestFailedMessage(FailedTestException& e)
+    void TestRunnerConsoleOutput::writeTestFailedMessage(FailedTestException& e)
     {
     }
 
-    void TestRunnerWindowsConsoleOutput::writeTestValueMismatchMessage(ValueMismatchTestException& e)
+    void TestRunnerConsoleOutput::writeTestValueMismatchMessage(ValueMismatchTestException& e)
     {
         PrintDiff(e.expectedValue, e.actualValue, e.location, e.outputMode);
     }
 
-    void TestRunnerWindowsConsoleOutput::writeSnapshotCreatedMessage(SnapshotCreatedTestException& e)
+    void TestRunnerConsoleOutput::writeSnapshotCreatedMessage(SnapshotCreatedTestException& e)
     {
         PrintDiff(e.expectedValue, e.actualValue, e.location, ValueMismatchTestException::OutputMode::Diff);
 
         std::cout << '\n' << orangeColorSequence.toStdString() << "   Snapshot created: " << resetAttributes.toStdString() << e.filePath.toStdString() << '\n';
     }
 
-    void TestRunnerWindowsConsoleOutput::writeTestRunnerResult(const TestSuiteResult& result)
+    void TestRunnerConsoleOutput::writeTestRunnerResult(const TestSuiteResult& result)
     {
         std::cout
             << " " << coloredPass.toStdString()
@@ -281,7 +325,7 @@ namespace CaraTest
             << '\n';
     }
 
-    void TestRunnerWindowsConsoleOutput::writeTestRunnerTotalResult(const QList<TestSuiteResult>& results)
+    void TestRunnerConsoleOutput::writeTestRunnerTotalResult(const QList<TestSuiteResult>& results)
     {
         TestSuiteResult totalResult{};
         for (const auto& result : results)
@@ -296,7 +340,7 @@ namespace CaraTest
         writeTestRunnerResult(totalResult);
     }
 
-    void TestRunnerWindowsConsoleOutput::writeEmptyLine()
+    void TestRunnerConsoleOutput::writeEmptyLine()
     {
         std::cout << '\n';
     }

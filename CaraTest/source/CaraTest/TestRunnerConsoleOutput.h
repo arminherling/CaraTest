@@ -4,10 +4,11 @@
 
 namespace CaraTest
 {
-    class TestRunnerWindowsConsoleOutput : public TestRunnerOutputBase
+    class TestRunnerConsoleOutput : public TestRunnerOutputBase
     {
     public:
-        TestRunnerWindowsConsoleOutput();
+        TestRunnerConsoleOutput();
+        ~TestRunnerConsoleOutput() override = default;
 
         void writeSuiteName(const QString& name) override;
         QPoint writeTestHeader(int currentTest, int totalTests, const QString& testName, bool hasSubTests) override;
@@ -23,8 +24,6 @@ namespace CaraTest
         void writeEmptyLine() override;
 
     private:
-        void* m_consoleHandle;
-        unsigned int m_oldConsoleOutputCodePage;
         int m_headerSize;
     };
 }

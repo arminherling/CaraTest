@@ -14,10 +14,10 @@ namespace CaraTest
         enum class OutputMode
         {
             None,
-            WindowsConsole
+            Console
         };
 
-        TestRunner(int argc, char* argv[], OutputMode output = OutputMode::WindowsConsole);
+        TestRunner(int argc, char* argv[], OutputMode output = OutputMode::Console);
 
         [[nodiscard]] int run(const TestSuite& suite);
         [[nodiscard]] int run(const QList<TestSuite>& suites);

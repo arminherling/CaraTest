@@ -1,6 +1,6 @@
 #include "TestRunner.h"
 #include <CaraTest/TestRunnerNullOutput.h>
-#include <CaraTest/TestRunnerWindowsConsoleOutput.h>
+#include <CaraTest/TestRunnerConsoleOutput.h>
 #include <CaraTest/FailureBehavior.h>
 
 namespace
@@ -13,8 +13,8 @@ namespace
         {
             using enum TestRunner::OutputMode;
 
-            case WindowsConsole:
-                return std::make_unique<TestRunnerWindowsConsoleOutput>();
+            case Console:
+                return std::make_unique<TestRunnerConsoleOutput>();
             case None:
             default:
                 return std::make_unique<TestRunnerNullOutput>();

@@ -9,6 +9,7 @@ namespace CaraTest
     {
     public:
         TestRunnerNullOutput() = default;
+        ~TestRunnerNullOutput() override = default;
 
         void writeSuiteName(const QString& name) override {};
         QPoint writeTestHeader(int currentTest, int totalTests, const QString& testName, bool hasSubTests) override { return QPoint(); };
