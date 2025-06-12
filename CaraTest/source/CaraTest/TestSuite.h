@@ -34,7 +34,7 @@ namespace CaraTest
             auto test = std::make_shared<
                 ParameterizedTest<
                 decltype(std::function(std::forward<TFunction>(function))),
-                decltype(std::function(std::forward<TData>(data)))::result_type>>(
+                typename decltype(std::function(std::forward<TData>(data)))::result_type>>(
                     std::function(std::forward<TFunction>(function)),
                     std::function(std::forward<TData>(data))(),
                     testName);
