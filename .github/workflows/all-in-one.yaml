@@ -43,14 +43,14 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y qt6-base-dev qt6-base-dev-tools qt6-core-dev
+        sudo apt-get install -y qt6-base-devel
 
     - name: Install Qt (Windows)
       if: runner.os == 'Windows'
       uses: jurplel/install-qt-action@v4
       with:
         version: 6.6.0
-        modules: 'qtbase,qt6core'
+        modules: 'qtbase'
         cache: true
 
     - name: Set reusable strings
