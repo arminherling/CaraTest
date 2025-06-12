@@ -72,6 +72,7 @@ jobs:
         msystem: MINGW64
 
     - name: Configure CMake
+      shell: bash
       run: |
         if [[ "${{ runner.os }}" == "Windows" && "${{ matrix.cpp_compiler }}" == "clang++" ]]; then
           cmake -B "${{ steps.strings.outputs.build-output-dir }}" \
