@@ -9,6 +9,7 @@
 
 #include <QString>
 #include <QFileInfo>
+#include <QDir>
 
 #include <source_location>
 
