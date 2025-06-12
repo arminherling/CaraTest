@@ -76,13 +76,13 @@ jobs:
       run: |
         if [[ "${{ runner.os }}" == "Windows" && "${{ matrix.cpp_compiler }}" == "clang++" ]]; then
           cmake -B "${{ steps.strings.outputs.build-output-dir }}" \
-            -DCMAKE_CXX_COMPILER="/c/Program Files/LLVM/bin/clang++.exe" \
+            -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe" \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DCARATEST_BUILD_TESTS=ON \
             -S "${{ github.workspace }}"
         elif [[ "${{ runner.os }}" == "Windows" && "${{ matrix.cpp_compiler }}" == "g++" ]]; then
           cmake -B "${{ steps.strings.outputs.build-output-dir }}" \
-            -DCMAKE_CXX_COMPILER="/c/mingw64/bin/g++.exe" \
+            -DCMAKE_CXX_COMPILER="C:/mingw64/bin/g++.exe" \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DCARATEST_BUILD_TESTS=ON \
             -S "${{ github.workspace }}"
