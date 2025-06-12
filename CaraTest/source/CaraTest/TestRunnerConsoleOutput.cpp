@@ -7,73 +7,11 @@
 #include <algorithm>
 #include <iostream>
 
-static constexpr int DefaultConsoleWidth = 80;
-
-#if defined(_MSC_VER)
-
-namespace 
-{
-#define NOMINMAX
-#include <Windows.h>
-
-    void* g_windowConsoleHandle = nullptr;
-
-    int SetupConsole()
-    {
-        g_windowConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-        SetConsoleOutputCP(CP_UTF8);
-        SetConsoleMode(g_windowConsoleHandle, ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo{};
-        GetConsoleScreenBufferInfo(g_windowConsoleHandle, &screenBufferInfo);
-        const auto consoleWidth = screenBufferInfo.dwSize.X;
-        if(consoleWidth == 0)
-            return DefaultConsoleWidth;
-
-        return consoleWidth - 12;
-    }
-
-    QPoint CurrentCursorPosition()
-    {
-        CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
-        GetConsoleScreenBufferInfo(g_windowConsoleHandle, &screenBuffer);
-        return QPoint(screenBuffer.dwCursorPosition.X, screenBuffer.dwCursorPosition.Y);
-    }
-
-    void MoveCursorToPosition(const QPoint& position)
-    {
-        COORD coord{ static_cast<SHORT>(position.x()), static_cast<SHORT>(position.y()) };
-        SetConsoleCursorPosition(g_windowConsoleHandle, coord);
-    }
-}
-
-#elif defined(__GNUC__) || defined(__clang__)
-
-namespace
-{
-    int SetupConsole()
-    {
-        return DefaultConsoleWidth;
-    }
-
-    QPoint CurrentCursorPosition()
-    {
-        return QPoint();
-    }
-
-    void MoveCursorToPosition(const QPoint& position)
-    {
-    }
-}
-
-#else
-#define TRIGGER_DEBUG_BREAK() static_assert(false, "Console output not supported yet");
-#endif
-
-
 namespace
 {
     using namespace CaraTest;
+
+    const auto defaultConsoleWidth = 80;
 
     const auto resetAttributes = QString("\033[0m");
     const auto greenColorSequence = QString("\033[38;2;138;226;138m");
@@ -82,6 +20,8 @@ namespace
     const auto redColorSequence = QString("\033[38;2;244;75;86m");
     const auto blueColorSequence = QString("\033[38;2;42;129;211m");
 
+    const auto moveCursorToPositionSequence = QString("\033[%1;%2H");
+
     const auto coloredPass = QString("%1PASS%2").arg(greenColorSequence, resetAttributes);
     const auto coloredSkip = QString("%1SKIP%2").arg(yellowColorSequence, resetAttributes);
     const auto coloredFail = QString("%1FAIL%2").arg(redColorSequence, resetAttributes);
@@ -89,6 +29,7 @@ namespace
     const auto underlinedSequence = QString("\033[4m");
     const auto diffLineBreak = QString("%1\n%2%3").arg(resetAttributes, underlinedSequence, redColorSequence);
     const auto lineBreakRegex = QRegularExpression("[\r\n]");
+
 
     std::string TestNumber(int currentNumber, int totalCount, bool printNumber)
     {
@@ -219,6 +160,69 @@ namespace
         std::cout << actualColoredOutput.toStdString() << '\n';
     }
 }
+
+#if defined(_MSC_VER)
+
+namespace
+{
+#define NOMINMAX
+#include <Windows.h>
+
+    void* g_windowConsoleHandle = nullptr;
+
+    int SetupConsole()
+    {
+        g_windowConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        SetConsoleOutputCP(CP_UTF8);
+        SetConsoleMode(g_windowConsoleHandle, ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo{};
+        GetConsoleScreenBufferInfo(g_windowConsoleHandle, &screenBufferInfo);
+        const auto consoleWidth = screenBufferInfo.dwSize.X;
+        if (consoleWidth == 0)
+            return defaultConsoleWidth;
+
+        return consoleWidth - 12;
+    }
+
+    QPoint CurrentCursorPosition()
+    {
+        CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
+        GetConsoleScreenBufferInfo(g_windowConsoleHandle, &screenBuffer);
+        return QPoint(screenBuffer.dwCursorPosition.X, screenBuffer.dwCursorPosition.Y);
+    }
+
+    void MoveCursorToPosition(const QPoint& position)
+    {
+        std::cout << moveCursorToPositionSequence.arg(position.y() + 1).arg(position.x() + 1).toStdString();
+        //COORD coord{ static_cast<SHORT>(position.x()), static_cast<SHORT>(position.y()) };
+        //SetConsoleCursorPosition(g_windowConsoleHandle, coord);
+    }
+}
+
+#elif defined(__GNUC__) || defined(__clang__)
+
+namespace
+{
+    int SetupConsole()
+    {
+        return defaultConsoleWidth;
+    }
+
+    QPoint CurrentCursorPosition()
+    {
+        return QPoint();
+    }
+
+    void MoveCursorToPosition(const QPoint& position)
+    {
+    }
+}
+
+#else
+#define TRIGGER_DEBUG_BREAK() static_assert(false, "Console output not supported yet");
+#endif
+
 
 namespace CaraTest
 {

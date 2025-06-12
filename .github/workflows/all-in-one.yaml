@@ -51,6 +51,22 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Install clang (LLVM)
+      if: runner.os == 'Windows' && matrix.cpp_compiler == 'clang++'
+      uses: llvm/llvm-build-action@v1
+      with:
+        version: "19"
+
+    - name: Install g++ (MSYS2)
+      if: runner.os == 'Windows' && matrix.cpp_compiler == 'g++'
+      uses: msys2/setup-msys2@v2
+      with:
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-ninja
+        msystem: MINGW64
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
