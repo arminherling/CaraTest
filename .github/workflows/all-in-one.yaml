@@ -76,5 +76,5 @@ jobs:
         if [[ "${{ runner.os }}" == "Windows" ]]; then
             ./${{ matrix.build_type }}/AllInOne.exe
         else
-            ./AllInOne
+            ./Tests/AllInOne/AllInOne
         fi
