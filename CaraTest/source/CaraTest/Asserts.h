@@ -12,7 +12,7 @@
 
 #include <source_location>
 
-namespace CaraTest 
+namespace CaraTest
 {
     CARATEST_API void Fail(const std::source_location& location = std::source_location::current());
     CARATEST_API void Skip(const std::source_location& location = std::source_location::current());
@@ -20,7 +20,10 @@ namespace CaraTest
     CARATEST_API void IsFalse(bool value, const std::source_location& location = std::source_location::current());
 
     template<class T1, class T2>
-    void AreEqual(T1&& expectedValue, T2&& actualValue, const std::source_location& location = std::source_location::current())
+    void AreEqual(
+        T1&& expectedValue, 
+        T2&& actualValue, 
+        const std::source_location& location = std::source_location::current())
     {
         if (expectedValue != actualValue)
         {
@@ -35,7 +38,10 @@ namespace CaraTest
     }
 
     template<class T1>
-    void EqualsFile(const QFileInfo& expectedContentFilePath, T1&& actualValue, const std::source_location& location = std::source_location::current())
+    void EqualsFile(
+        const QFileInfo& expectedContentFilePath, 
+        T1&& actualValue, 
+        const std::source_location& location = std::source_location::current())
     {
         const auto stringifiedActualValue = Stringify(actualValue);
         if (!expectedContentFilePath.exists())
@@ -58,3 +64,16 @@ namespace CaraTest
         }
     }
 }
+
+#define CARATEST_TRIGGER_BREAK_ON_MATCH(firstValue, secondValue)                                                    \
+    do {                                                                                                            \
+        if ((firstValue) == (secondValue)) {                                                                        \
+            TRIGGER_DEBUG_BREAK();                                                                                  \
+        } else  {                                                                                                   \
+            const auto _firstStringified = StringifyAndMaybeQuote(firstValue);                                      \
+            const auto _secondStringified = StringifyAndMaybeQuote(secondValue);                                    \
+            if (_firstStringified.contains(_secondStringified) || _secondStringified.contains(_firstStringified)) { \
+                TRIGGER_DEBUG_BREAK();                                                                              \
+            }                                                                                                       \
+        }                                                                                                           \
+    } while(0)
