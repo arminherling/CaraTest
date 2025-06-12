@@ -15,8 +15,13 @@ namespace CaraTest
     CARATEST_API void SetFailureBehavior(FailureBehavior value);
 }
 
-#define TRIGGER_DEBUG_BREAK()                                                       \
-    __debugbreak();
+#if defined(_MSC_VER)
+    #define TRIGGER_DEBUG_BREAK() __debugbreak();
+#elif defined(__GNUC__) || defined(__clang__)
+    #define TRIGGER_DEBUG_BREAK() __builtin_trap();
+#else
+    #define TRIGGER_DEBUG_BREAK() static_assert(false, "Debug break not supported for this compiler");
+#endif
 
 #define HANDLE_CARATEST_FAILURE()                                                   \
     do {                                                                            \
