@@ -64,6 +64,10 @@ jobs:
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
+    - name: Debug Build Directory
+      shell: bash
+      run: ls -R ${{ steps.strings.outputs.build-output-dir }}
+
     - name: Test
       shell: bash
       run: |
