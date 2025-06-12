@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <iostream>
 
+static constexpr int DefaultConsoleWidth = 80;
+
 #if defined(_MSC_VER)
 
 namespace 
@@ -25,6 +27,9 @@ namespace
         CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo{};
         GetConsoleScreenBufferInfo(g_windowConsoleHandle, &screenBufferInfo);
         const auto consoleWidth = screenBufferInfo.dwSize.X;
+        if(consoleWidth == 0)
+            return DefaultConsoleWidth;
+
         return consoleWidth - 12;
     }
 
@@ -48,7 +53,7 @@ namespace
 {
     int SetupConsole()
     {
-        return 80;
+        return DefaultConsoleWidth;
     }
 
     QPoint CurrentCursorPosition()
