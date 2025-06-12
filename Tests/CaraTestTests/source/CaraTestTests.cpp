@@ -15,7 +15,7 @@ namespace Simple
         int i = 0;
         suite.add(QString(), [&i]() {i++; });
 
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(i, 1);
     }
@@ -32,7 +32,7 @@ namespace Simple
             {
                 // do nothing
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -51,7 +51,7 @@ namespace Simple
             {
                 CaraTest::Fail();
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -70,7 +70,7 @@ namespace Simple
             {
                 CaraTest::Skip();
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -121,7 +121,7 @@ namespace Simple
                 auto value = true;
                 CaraTest::IsTrue(value);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -141,7 +141,7 @@ namespace Simple
                 auto value = false;
                 CaraTest::IsTrue(value);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -161,7 +161,7 @@ namespace Simple
                 auto value = false;
                 CaraTest::IsFalse(value);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -181,7 +181,7 @@ namespace Simple
                 auto value = true;
                 CaraTest::IsFalse(value);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -202,7 +202,7 @@ namespace Simple
                 auto actualValue = true;
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -223,7 +223,7 @@ namespace Simple
                 auto actualValue = false;
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -244,7 +244,7 @@ namespace Simple
                 auto actualValue = false;
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -265,7 +265,7 @@ namespace Simple
                 auto actualValue = 0;
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -286,7 +286,7 @@ namespace Simple
                 auto actualValue = 1;
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -307,14 +307,14 @@ namespace Simple
                 auto actualValue = 0;
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
         CaraTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenEmptyStringAndEmptyString()
+    static void TestAreEqualWhenEmptyStringAndEmptyString()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -328,14 +328,14 @@ namespace Simple
                 auto actualValue = QString();
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
         CaraTest::AreEqual(expectedSkips, suite.skippedTests());
     }
 
-    void TestAreEqualWhenStringAndSameString()
+    static void TestAreEqualWhenStringAndSameString()
     {
         int expectedPasses = 1;
         int expectedFails = 0;
@@ -349,7 +349,7 @@ namespace Simple
                 auto actualValue = QString("string");
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -370,7 +370,7 @@ namespace Simple
                 auto actualValue = QString("other");
                 CaraTest::AreEqual(expectedValue, actualValue);
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -396,7 +396,7 @@ namespace Simple
                 CaraTest::Fail();
             });
 
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -413,7 +413,7 @@ namespace Parameterized
         int i = 0;
         suite.add(QString(), [&i]() {i++; });
 
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(i, 1);
     }
@@ -439,7 +439,7 @@ namespace Parameterized
             { 
                 return QList{ std::make_tuple(true), std::make_tuple(false) }; 
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -463,7 +463,7 @@ namespace Parameterized
             {
                 return QList{ std::make_tuple(true), std::make_tuple(false), std::make_tuple(false) };
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -486,7 +486,7 @@ namespace Parameterized
             {
                 return QList{ std::make_tuple(false), std::make_tuple(false) };
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -509,7 +509,7 @@ namespace Parameterized
             {
                 return QList{ std::make_tuple(true), std::make_tuple(false) };
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -535,7 +535,7 @@ namespace Parameterized
             {
                 return QList{ std::make_tuple(false), std::make_tuple(true), std::make_tuple(false) };
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -558,7 +558,7 @@ namespace Parameterized
             {
                 return QList{ std::make_tuple(true), std::make_tuple(false) };
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -581,7 +581,7 @@ namespace Parameterized
             {
                 return QList<std::tuple<bool>>{};
             });
-        runner.run(suite);
+        const auto result = runner.run(suite);
 
         CaraTest::AreEqual(expectedPasses, suite.passedTests());
         CaraTest::AreEqual(expectedFails, suite.failedTests());
@@ -610,7 +610,7 @@ static void EqualsFileCreatesSnapshotWhenFileDoesNotExist()
         {
             CaraTest::EqualsFile(QFileInfo(testFilePath), QString("TestValue"));
         });
-    runner.run(suite);
+    const auto result = runner.run(suite);
 
     const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
     auto snapshotFile = QFile(snapshotFilePath);
@@ -642,7 +642,7 @@ static void EqualsFileDoesntCreateSnapshotWhenValuesAreEqual()
         {
             CaraTest::EqualsFile(QFileInfo(testFilePath), expectedValue);
         });
-    runner.run(suite);
+    const auto result = runner.run(suite);
 
     const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
     auto snapshotFile = QFile(snapshotFilePath);
@@ -674,7 +674,7 @@ static void EqualsFileCreateSnapshotWhenValuesAreNotEqual()
         {
             CaraTest::EqualsFile(QFileInfo(testFilePath), QString("Some other Value"));
         });
-    runner.run(suite);
+    const auto result = runner.run(suite);
 
     const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
     auto snapshotFile = QFile(snapshotFilePath);

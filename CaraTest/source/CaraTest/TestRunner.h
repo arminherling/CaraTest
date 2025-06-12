@@ -19,8 +19,8 @@ namespace CaraTest
 
         TestRunner(int argc, char* argv[], OutputMode output = OutputMode::WindowsConsole);
 
-        void run(const TestSuite& suite);
-        void run(const QList<TestSuite>& suites);
+        [[nodiscard]] int run(const TestSuite& suite);
+        [[nodiscard]] int run(const QList<TestSuite>& suites);
 
     private:
         std::unique_ptr<TestRunnerOutputBase> m_output;

@@ -49,26 +49,49 @@ namespace CaraTest
         ParseAndSetFailureBehavior(argc, argv);
     }
 
-    void TestRunner::run(const TestSuite& suite)
+    int TestRunner::run(const TestSuite& suite)
     {
         const auto result = runInternal(suite);
 
         m_output->writeTestRunnerResult(result);
+
+        if (result.failedTestCount != 0)
+        {
+            return 1; // some tests failed
+        }
+        else
+        {
+            return 0; // all tests passed
+        }
     }
 
-    void TestRunner::run(const QList<TestSuite>& suites)
+    int TestRunner::run(const QList<TestSuite>& suites)
     {
         QList<TestSuiteResult> results;
+        bool someFailedTests = false;
         for (const auto& suite : suites)
         {
             const auto result = runInternal(suite);
             results << result;
+            if (result.failedTestCount != 0)
+            {
+                someFailedTests = true;
+            }
 
             m_output->writeTestRunnerResult(result);
             m_output->writeEmptyLine();
         }
         m_output->writeEmptyLine();
         m_output->writeTestRunnerTotalResult(results);
+
+        if (someFailedTests)
+        {
+            return 1; // some tests failed
+        }
+        else
+        {
+            return 0; // all tests passed
+        }
     }
 
     TestSuiteResult TestRunner::runInternal(const TestSuite& suite)

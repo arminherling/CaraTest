@@ -10,8 +10,6 @@ int main(int argc, char* argv[])
     QList<TestSuite> testSuites{};
     testSuites << CaraTestTestsSuite();
     testSuites << DiffTestsSuite();
-
-    runner.run(testSuites);
-
-    return 0;
+    
+    return runner.run(testSuites);
 }
