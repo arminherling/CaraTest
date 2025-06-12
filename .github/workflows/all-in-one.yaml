@@ -71,6 +71,17 @@ jobs:
           mingw-w64-x86_64-ninja
         msystem: MINGW64
 
+    - name: Debug path
+      shell: bash
+      run: |
+        if [[ "${{ runner.os }}" == "Windows" && "${{ matrix.cpp_compiler }}" == "clang++" ]]; then
+          which clang++
+        elif [[ "${{ runner.os }}" == "Windows" && "${{ matrix.cpp_compiler }}" == "g++" ]]; then
+          which g++
+        else
+          which cl
+        fi
+
     - name: Configure CMake
       shell: bash
       run: |
