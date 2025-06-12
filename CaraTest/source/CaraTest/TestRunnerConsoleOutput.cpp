@@ -48,7 +48,7 @@ namespace
 {
     int SetupConsole()
     {
-        return 50;
+        return 80;
     }
 
     QPoint CurrentCursorPosition()

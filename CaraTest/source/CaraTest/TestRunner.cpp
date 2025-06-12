@@ -61,7 +61,7 @@ namespace CaraTest
         }
         else
         {
-            return 1; // all tests passed
+            return 0; // all tests passed
         }
     }
 
@@ -90,7 +90,7 @@ namespace CaraTest
         }
         else
         {
-            return 1; // all tests passed
+            return 0; // all tests passed
         }
     }
 
