@@ -30,7 +30,6 @@ namespace
     const auto diffLineBreak = QString("%1\n%2%3").arg(resetAttributes, underlinedSequence, redColorSequence);
     const auto lineBreakRegex = QRegularExpression("[\r\n]");
 
-
     std::string TestNumber(int currentNumber, int totalCount, bool printNumber)
     {
         const auto totalCountString = QString::number(totalCount);
@@ -287,13 +286,10 @@ namespace CaraTest
 
         const auto oldPosition = CurrentCursorPosition();
 
-        //const auto cursorPosition = COORD{ (short)position.x(), (short)position.y() };
-        //SetConsoleCursorPosition(m_consoleHandle, cursorPosition);
         MoveCursorToPosition(position);
 
         std::cout << StringifyTestResult(result).toStdString() << std::flush;
 
-        //SetConsoleCursorPosition(m_consoleHandle, oldPosition);
         MoveCursorToPosition(oldPosition);
     }
 
