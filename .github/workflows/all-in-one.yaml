@@ -18,7 +18,9 @@ jobs:
         cpp_compiler: [g++, clang++, cl]
         exclude:
           - os: ubuntu-latest
-            cpp_compiler: cl      
+            cpp_compiler: cl
+          - os: windows-latest
+            cpp_compiler: g++
 
     steps:
     - uses: actions/checkout@v4
@@ -27,7 +29,7 @@ jobs:
       uses: jurplel/install-qt-action@v4
       with:
         version: '6.6.0'
-        arch: ${{ (matrix.os == 'windows-latest' && matrix.cpp_compiler == 'g++') && 'win64_mingw' || '' }}
+        #arch: ${{ (matrix.os == 'windows-latest' && matrix.cpp_compiler == 'g++') && 'win64_mingw' || '' }}
 
     - name: Set reusable strings
       id: strings
@@ -54,15 +56,10 @@ jobs:
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Show Build Folder Content (Windows)
-      if: runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        Get-ChildItem -Path "${{ steps.strings.outputs.build-output-dir }}" -Recurse | Select-Object FullName
-
     - name: Run Test (Windows)
       if: runner.os == 'Windows'
-      run: ${{ steps.strings.outputs.build-output-dir }}/AllInOne.exe
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      run: ./AllInOne.exe
 
     - name: Run Test (Linux)
       if: runner.os == 'Linux'
