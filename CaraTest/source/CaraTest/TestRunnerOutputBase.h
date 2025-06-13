@@ -14,6 +14,8 @@ namespace CaraTest
     class TestRunnerOutputBase
     {
     public:
+        virtual ~TestRunnerOutputBase() = default;
+
         virtual void writeSuiteName(const QString& name) = 0;
         virtual QPoint writeTestHeader(int currentTest, int totalTests, const QString& testName, bool hasSubTests) = 0;
         virtual QPoint writeSubTestHeader(int indentation, int currentTest, int totalTests, const QString& parameters) = 0;
