@@ -56,7 +56,7 @@ jobs:
 
     - name: Show Build Folder Content (Windows)
       if: runner.os == 'Windows'
-      run: dir ${{ github.workspace }}\build /s /b
+      run: dir ${{ steps.strings.outputs.build-output-dir }} /s
 
     - name: Run Test (Windows)
       if: runner.os == 'Windows'
