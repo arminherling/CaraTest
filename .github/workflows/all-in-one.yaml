@@ -12,13 +12,6 @@ jobs:
 
     strategy:
       fail-fast: false
-
-      # Set up a matrix to run the following 3 configurations:
-      # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
-      # 2. <Linux, Release, latest GCC compiler toolchain on the default runner image, default generator>
-      # 3. <Linux, Release, latest Clang compiler toolchain on the default runner image, default generator>
-      #
-      # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
@@ -38,61 +31,33 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
         version: '6.6.0'
 
     - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install clang++ (MSYS2)
-      if: runner.os == 'Windows' && matrix.cpp_compiler == 'clang++'
-      uses: msys2/setup-msys2@v2
+    - name: Setup C++ Compiler and Tools
+      uses: aminya/setup-cpp@v1
       with:
-        install: >-
-          mingw-w64-x86_64-clang
-          mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-ninja
-        msystem: MINGW64
-
-    - name: Install g++ (MSYS2)
-      if: runner.os == 'Windows' && matrix.cpp_compiler == 'g++'
-      uses: msys2/setup-msys2@v2
-      with:
-        install: >-
-          mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-ninja
-        msystem: MINGW64
+        compiler: ${{ matrix.cpp_compiler }}
+        cmake: true
+        ninja: true
 
     - name: Configure CMake
-      shell: bash
-      run: |
-        if [[ "${{ runner.os }}" == "Windows" && "${{ matrix.cpp_compiler }}" == "clang++" ]]; then
-          cmake -B "${{ steps.strings.outputs.build-output-dir }}" \
-            -DCMAKE_CXX_COMPILER="C:/Program Files/LLVM/bin/clang++.exe" \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DCARATEST_BUILD_TESTS=ON \
-            -S "${{ github.workspace }}"
-        elif [[ "${{ runner.os }}" == "Windows" && "${{ matrix.cpp_compiler }}" == "g++" ]]; then
-          cmake -B "${{ steps.strings.outputs.build-output-dir }}" \
-            -DCMAKE_CXX_COMPILER="C:/mingw64/bin/g++.exe" \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DCARATEST_BUILD_TESTS=ON \
-            -S "${{ github.workspace }}"
-        else
-          cmake -B "${{ steps.strings.outputs.build-output-dir }}" \
-            -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-            -DCARATEST_BUILD_TESTS=ON \
-            -S "${{ github.workspace }}"
-        fi
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -G Ninja
+        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -DCARATEST_BUILD_TESTS=ON
+        -S ${{ github.workspace }}
 
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
