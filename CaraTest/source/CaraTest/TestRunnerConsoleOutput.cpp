@@ -197,9 +197,8 @@ namespace
 
     void MoveCursorToPosition(const QPoint& position)
     {
-        std::cout << moveCursorToPositionSequence.arg(position.y() + 1).arg(position.x() + 1).toStdString();
-        //COORD coord{ static_cast<SHORT>(position.x()), static_cast<SHORT>(position.y()) };
-        //SetConsoleCursorPosition(g_windowConsoleHandle, coord);
+        COORD coord{ static_cast<SHORT>(position.x()), static_cast<SHORT>(position.y()) };
+        SetConsoleCursorPosition(g_windowConsoleHandle, coord);
     }
 }
 
