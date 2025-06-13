@@ -89,14 +89,14 @@ enum class TokenKind
 
 QString Stringify(TokenKind kind)
 {
-	switch (kind)
-	{
-		case TokenKind::Plus:
-			return QString("Plus");
-		case TokenKind::Minus:
-			return QString("Minus");
-		...
-	}
+    switch (kind)
+    {
+        case TokenKind::Plus:
+            return QString("Plus");
+        case TokenKind::Minus:
+            return QString("Minus");
+        ...
+    }
 }
 ```
 Make sure to include the header where you define the `Stringify` function in your test file, so that CaraTest can find it when generating error messages.
