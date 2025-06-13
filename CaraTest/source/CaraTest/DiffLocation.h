@@ -4,7 +4,7 @@
 
 namespace CaraTest
 {
-    enum class CARATEST_API DiffChange
+    enum class DiffChange
     {
         Unknown,
         Addition,

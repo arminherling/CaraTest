@@ -67,7 +67,7 @@ jobs:
       shell: bash
       run: |
         if [[ "${{ runner.os }}" == "Windows" ]]; then
-            ./${{ matrix.build_type }}/AllInOne.exe
+            ./AllInOne.exe
         else
             ./Tests/AllInOne/AllInOne
         fi
