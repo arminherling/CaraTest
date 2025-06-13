@@ -56,7 +56,9 @@ jobs:
 
     - name: Show Build Folder Content (Windows)
       if: runner.os == 'Windows'
-      run: dir ${{ steps.strings.outputs.build-output-dir }} /s
+      shell: pwsh
+      run: |
+        Get-ChildItem -Path "${{ steps.strings.outputs.build-output-dir }}" -Recurse | Select-Object FullName
 
     - name: Run Test (Windows)
       if: runner.os == 'Windows'
