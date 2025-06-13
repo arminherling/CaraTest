@@ -54,14 +54,14 @@ jobs:
     - name: Build
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
+    - name: Show Build Folder Content (Windows)
+      if: runner.os == 'Windows'
+      run: dir ${{ steps.strings.outputs.build-output-dir }} /s /b
+
     - name: Run Test (Windows)
       if: runner.os == 'Windows'
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: |
-        if (-Not (Test-Path .\AllInOne.exe)) {
-          Write-Error "Test executable not found!"
-        }
-        .\AllInOne.exe || exit 1
+      run: ./AllInOne.exe
 
     - name: Run Test (Linux)
       if: runner.os == 'Linux'
