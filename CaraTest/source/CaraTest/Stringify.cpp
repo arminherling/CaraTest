@@ -33,6 +33,11 @@ namespace CaraTest
         return stringView.toString();
     }
 
+    QString Stringify(const std::string& string)
+    {
+        return QString::fromStdString(string);
+    }
+
     QString Stringify(const std::chrono::nanoseconds& input)
     {
         auto ns = input;

@@ -34,6 +34,7 @@ namespace CaraTest
     CARATEST_API QString Stringify(const char* str);
     CARATEST_API QString Stringify(const QString& string);
     CARATEST_API QString Stringify(const QStringView stringView);
+    CARATEST_API QString Stringify(const std::string& string);
     CARATEST_API QString Stringify(const std::chrono::nanoseconds& ns);
 
     template<class T>
