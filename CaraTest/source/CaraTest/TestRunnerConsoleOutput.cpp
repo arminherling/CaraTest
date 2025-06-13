@@ -161,7 +161,7 @@ namespace
     }
 }
 
-#if defined(_MSC_VER)
+#if defined(_WIN32) || defined(_WIN64)
 
 namespace
 {
@@ -200,7 +200,7 @@ namespace
     }
 }
 
-#elif defined(__GNUC__) || defined(__clang__)
+#else
 
 namespace
 {
@@ -219,8 +219,6 @@ namespace
     }
 }
 
-#else
-#define TRIGGER_DEBUG_BREAK() static_assert(false, "Console output not supported yet");
 #endif
 
 
