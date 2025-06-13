@@ -67,7 +67,6 @@ If they are not equal, the test fails and a .snapshot file is generated.
 
 
 ## Macro
-CARATEST_TRIGGER_BREAK_ON_MATCH(firstValue, secondValue)
 ```cpp
 CARATEST_TRIGGER_BREAK_ON_MATCH(firstValue, secondValue);
 ```
