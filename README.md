@@ -3,7 +3,7 @@
 [![AllInOne](https://github.com/arminherling/CaraTest/actions/workflows/all-in-one.yaml/badge.svg)](https://github.com/arminherling/CaraTest/actions/workflows/all-in-one.yaml)
 
 ## Description
-Very basic test framework that I made for [Aalenian](https://github.com/arminherling/Aalenian), because QTest didn't support printing the combined results of multiple TestSuits without ugly hacks.
+Very basic test framework that I made for [Caracal](https://github.com/arminherling/Caracal), because QTest didn't support printing the combined results of multiple TestSuits without ugly hacks.
 
 
 ## Features
