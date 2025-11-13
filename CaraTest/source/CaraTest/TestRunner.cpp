@@ -1,7 +1,6 @@
-#include "TestRunner.h"
+﻿#include <CaraTest/TestRunner.h>
 #include <CaraTest/TestRunnerNullOutput.h>
 #include <CaraTest/TestRunnerConsoleOutput.h>
-#include <CaraTest/FailureBehavior.h>
 
 namespace
 {
@@ -27,14 +26,14 @@ namespace
         {
             for (int i = 1; i < argc; i++)
             {
-                const auto argument = QString::fromLocal8Bit(argv[i]);
-                if (argument.compare("--break_on_fail", Qt::CaseSensitivity::CaseInsensitive) == 0)
+                const auto argument = std::string(argv[i]);
+                if (argument.compare("--break_on_fail") == 0)
                 {
-                    SetFailureBehavior(FailureBehavior::DebugBreak);
+                    setFailureBehavior(FailureBehavior::DebugBreak);
                 } 
-                else if (argument.compare("--break_and_rerun_on_fail", Qt::CaseSensitivity::CaseInsensitive) == 0)
+                else if (argument.compare("--break_and_rerun_on_fail") == 0)
                 {
-                    SetFailureBehavior(FailureBehavior::DebugBreakAndRerun);
+                    setFailureBehavior(FailureBehavior::DebugBreakAndRerun);
                 }
             }
         }
@@ -65,14 +64,14 @@ namespace CaraTest
         }
     }
 
-    int TestRunner::run(const QList<TestSuite>& suites)
+    int TestRunner::run(const std::vector<TestSuitePtr>& suites)
     {
-        QList<TestSuiteResult> results;
+        std::vector<TestSuiteResult> results;
         bool someFailedTests = false;
         for (const auto& suite : suites)
         {
-            const auto result = runInternal(suite);
-            results << result;
+            const auto result = runInternal(*suite);
+            results.push_back(result);
             if (result.failedTestCount != 0)
             {
                 someFailedTests = true;
@@ -103,7 +102,7 @@ namespace CaraTest
         {
             totalTestCount += test->testCount();
         }
-        const auto totalCountString = QString::number(totalTestCount);
+        const auto totalCountString = std::to_string(totalTestCount);
 
         m_output->writeSuiteName(suite.name());
         const auto suiteStartTime = std::chrono::high_resolution_clock::now();

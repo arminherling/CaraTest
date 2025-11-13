@@ -1,10 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include <CaraTest/API.h>
 #include <CaraTest/TestRunnerOutputBase.h>
 #include <CaraTest/TestSuite.h>
-#include <CaraTest/TestSuiteResult.h>
-#include <QList>
 
 namespace CaraTest
 {
@@ -20,10 +18,10 @@ namespace CaraTest
         TestRunner(int argc, char* argv[], OutputMode output = OutputMode::Console);
 
         [[nodiscard]] int run(const TestSuite& suite);
-        [[nodiscard]] int run(const QList<TestSuite>& suites);
+        [[nodiscard]] int run(const std::vector<TestSuitePtr>& suites);
 
     private:
-        std::unique_ptr<TestRunnerOutputBase> m_output;
+        TestRunnerOutputBaseUPtr m_output;
 
         TestSuiteResult runInternal(const TestSuite& suite);
     };

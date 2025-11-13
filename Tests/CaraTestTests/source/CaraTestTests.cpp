@@ -1,8 +1,8 @@
-#include "CaraTestTests.h"
-#include <CaraTest.h>
+﻿#include <CaraTest.h>
 
-#include <QDir>
-#include <QRandomGenerator>
+#include <filesystem>
+#include <random>
+#include <sstream>
 
 using namespace CaraTest;
 
@@ -13,11 +13,11 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
         int i = 0;
-        suite.add(QString(), [&i]() {i++; });
+        suite.add(std::string(), [&i]() {i++; });
 
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(i, 1);
+        CaraTest::areEqual(i, 1);
     }
 
     static void TestCanPass()
@@ -28,15 +28,15 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 // do nothing
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestCanFail()
@@ -47,15 +47,15 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                CaraTest::Fail();
+                CaraTest::fail();
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestCanBeSkipped()
@@ -66,46 +66,46 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                CaraTest::Skip();
+                CaraTest::skip();
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestSuitesReturnsAddedTests()
     {
         auto expectedTestCount = 2;
         TestSuite suite{};
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                CaraTest::Skip();
+                CaraTest::skip();
             });
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                CaraTest::Fail();
+                CaraTest::fail();
             });
 
-        CaraTest::AreEqual(expectedTestCount, (int)suite.tests().size());
+        CaraTest::areEqual(expectedTestCount, (int)suite.tests().size());
     }
 
     static void TestContainsCallingTestName()
     {
-        QString expectedName = QString("TestContainsCallingTestName");
+        std::string expectedName = std::string("TestContainsCallingTestName");
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
-        suite.add(QString("TestContainsCallingTestName"), []()
+        suite.add(std::string("TestContainsCallingTestName"), []()
             {
-                CaraTest::Skip();
+                CaraTest::skip();
             });
 
         auto& test = suite.tests().at(0);
 
-        CaraTest::AreEqual(expectedName, test->testName());
+        CaraTest::areEqual(expectedName, test->name());
     }
 
     static void TestIsTrueWhenTrue()
@@ -116,16 +116,16 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto value = true;
-                CaraTest::IsTrue(value);
+                CaraTest::isTrue(value);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestIsTrueWhenFalse()
@@ -136,16 +136,16 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto value = false;
-                CaraTest::IsTrue(value);
+                CaraTest::isTrue(value);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestIsFalseWhenFalse()
@@ -156,16 +156,16 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto value = false;
-                CaraTest::IsFalse(value);
+                CaraTest::isFalse(value);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestIsFalseWhenTrue()
@@ -176,16 +176,16 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto value = true;
-                CaraTest::IsFalse(value);
+                CaraTest::isFalse(value);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenTrueAndTrue()
@@ -196,17 +196,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto expectedValue = true;
                 auto actualValue = true;
-                CaraTest::AreEqual(expectedValue, actualValue);
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenFalseAndFalse()
@@ -217,17 +217,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto expectedValue = false;
                 auto actualValue = false;
-                CaraTest::AreEqual(expectedValue, actualValue);
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenTrueAndFalse()
@@ -238,17 +238,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto expectedValue = true;
                 auto actualValue = false;
-                CaraTest::AreEqual(expectedValue, actualValue);
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenZeroAndZero()
@@ -259,17 +259,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto expectedValue = 0;
                 auto actualValue = 0;
-                CaraTest::AreEqual(expectedValue, actualValue);
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenOneAndOne()
@@ -280,17 +280,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto expectedValue = 1;
                 auto actualValue = 1;
-                CaraTest::AreEqual(expectedValue, actualValue);
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenOneAndZero()
@@ -301,17 +301,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
                 auto expectedValue = 1;
                 auto actualValue = 0;
-                CaraTest::AreEqual(expectedValue, actualValue);
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenEmptyStringAndEmptyString()
@@ -322,17 +322,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                auto expectedValue = QString();
-                auto actualValue = QString();
-                CaraTest::AreEqual(expectedValue, actualValue);
+                auto expectedValue = std::string();
+                auto actualValue = std::string();
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenStringAndSameString()
@@ -343,17 +343,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                auto expectedValue = QString("string");
-                auto actualValue = QString("string");
-                CaraTest::AreEqual(expectedValue, actualValue);
+                auto expectedValue = std::string("string");
+                auto actualValue = std::string("string");
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestAreEqualWhenStringAndDifferentString()
@@ -364,17 +364,17 @@ namespace Simple
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                auto expectedValue = QString("string");
-                auto actualValue = QString("other");
-                CaraTest::AreEqual(expectedValue, actualValue);
+                auto expectedValue = std::string("string");
+                auto actualValue = std::string("other");
+                CaraTest::areEqual(expectedValue, actualValue);
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestRunnerExecutesTests()
@@ -384,23 +384,23 @@ namespace Simple
         int expectedSkips = 1;
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
             });
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                CaraTest::Skip();
+                CaraTest::skip();
             });
-        suite.add(QString(), []()
+        suite.add(std::string(), []()
             {
-                CaraTest::Fail();
+                CaraTest::fail();
             });
 
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 }
 
@@ -411,14 +411,14 @@ namespace Parameterized
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
         int i = 0;
-        suite.add(QString(), [&i]() {i++; });
+        suite.add(std::string(), [&i]() {i++; });
 
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(i, 1);
+        CaraTest::areEqual(i, 1);
     }
 
-    static QList<std::tuple<bool>> TestCanExecuteWithParameters_Data()
+    static std::vector<std::tuple<bool>> TestCanExecuteWithParameters_Data()
     {
         return { std::make_tuple(true), std::make_tuple(false) };
     }
@@ -431,19 +431,19 @@ namespace Parameterized
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), [](bool value)
+        suite.add(std::string(), [](bool value)
             {
                 // do nothing
             }, 
             []() 
             { 
-                return QList{ std::make_tuple(true), std::make_tuple(false) }; 
+                return std::vector{ std::make_tuple(true), std::make_tuple(false) };
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestWithSkipOnTrueInThreeSubTestsHasTwoPassesAndOneSkip()
@@ -454,20 +454,20 @@ namespace Parameterized
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), [](bool value)
+        suite.add(std::string(), [](bool value)
             {
                 if (value)
-                    CaraTest::Skip();
+                    CaraTest::skip();
             },
             []()
             {
-                return QList{ std::make_tuple(true), std::make_tuple(false), std::make_tuple(false) };
+                return std::vector{ std::make_tuple(true), std::make_tuple(false), std::make_tuple(false) };
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestWithFailInTwoSubTestsHasTwoFails()
@@ -478,22 +478,22 @@ namespace Parameterized
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), [](bool value)
+        suite.add(std::string(), [](bool value)
             {
-                CaraTest::Fail();
+                CaraTest::fail();
             },
             []()
             {
-                return QList{ std::make_tuple(false), std::make_tuple(false) };
+                return std::vector{ std::make_tuple(false), std::make_tuple(false) };
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
-    static void TestWithIsTrueCheckInTwoSubTestsHasOnePassAndOneFails()
+    static void TestWithIsTrueCheckInTwoSubTestsHasOnePassAndOneFail()
     {
         int expectedPasses = 1;
         int expectedFails = 1;
@@ -501,19 +501,19 @@ namespace Parameterized
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), [](bool value)
+        suite.add(std::string(), [](bool value)
             {
-                CaraTest::IsTrue(value);
+                CaraTest::isTrue(value);
             },
             []()
             {
-                return QList{ std::make_tuple(true), std::make_tuple(false) };
+                return std::vector{ std::make_tuple(true), std::make_tuple(false) };
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestWithSkipOnTrueAndFailHasOneSkipAndTwoFails()
@@ -524,22 +524,22 @@ namespace Parameterized
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), [](bool value)
+        suite.add(std::string(), [](bool value)
             {
                 if (value)
-                    CaraTest::Skip();
+                    CaraTest::skip();
 
-                CaraTest::Fail();
+                CaraTest::fail();
             },
             []()
             {
-                return QList{ std::make_tuple(false), std::make_tuple(true), std::make_tuple(false) };
+                return std::vector{ std::make_tuple(false), std::make_tuple(true), std::make_tuple(false) };
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestWithSkipInTwoSubTestsHasTwoSkips()
@@ -550,19 +550,19 @@ namespace Parameterized
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), [](bool value)
+        suite.add(std::string(), [](bool value)
             {
-                CaraTest::Skip();
+                CaraTest::skip();
             },
             []()
             {
-                return QList{ std::make_tuple(true), std::make_tuple(false) };
+                return std::vector{ std::make_tuple(true), std::make_tuple(false) };
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 
     static void TestWithoutDataDontExecute()
@@ -573,27 +573,35 @@ namespace Parameterized
         TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
         TestSuite suite{};
 
-        suite.add(QString(), [](bool value)
+        suite.add(std::string(), [](bool value)
             {
                 // do nothing
             },
             []()
             {
-                return QList<std::tuple<bool>>{};
+                return std::vector<std::tuple<bool>>{};
             });
         const auto result = runner.run(suite);
 
-        CaraTest::AreEqual(expectedPasses, suite.passedTests());
-        CaraTest::AreEqual(expectedFails, suite.failedTests());
-        CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+        CaraTest::areEqual(expectedPasses, suite.passedTests());
+        CaraTest::areEqual(expectedFails, suite.failedTests());
+        CaraTest::areEqual(expectedSkips, suite.skippedTests());
     }
 }
 
-static QString GenerateRandomFilePath()
+static std::filesystem::path GenerateRandomFilePath()
 {
-    const auto value = QRandomGenerator::global()->generate();
-    const auto testFilePath = QDir::cleanPath(QDir::tempPath() + QString("/test_file_%1.test").arg(value));
-    return testFilePath;
+    // Generate a random number using the standard library
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::uniform_int_distribution<int> distribution(0, std::numeric_limits<int>::max());
+    const auto value = distribution(generator);
+
+    // Construct the file path using std::filesystem
+    const auto tempPath = std::filesystem::temp_directory_path();
+    std::ostringstream fileNameStream;
+    fileNameStream << "test_file_" << value << ".test";
+    return tempPath / fileNameStream.str();
 }
 
 static void EqualsFileCreatesSnapshotWhenFileDoesNotExist()
@@ -606,55 +614,59 @@ static void EqualsFileCreatesSnapshotWhenFileDoesNotExist()
 
     const auto testFilePath = GenerateRandomFilePath();
 
-    suite.add(QString(), [=]()
+    suite.add(std::string(), [=]()
         {
-            CaraTest::EqualsFile(QFileInfo(testFilePath), QString("TestValue"));
+            CaraTest::equalsFile(testFilePath, std::string("TestValue"));
         });
     const auto result = runner.run(suite);
 
-    const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
-    auto snapshotFile = QFile(snapshotFilePath);
-    
-    const auto fileExists = snapshotFile.exists();
-    const auto wasRemoved = snapshotFile.remove();
+    const auto snapshotFilePath = testFilePath.string() + ".snapshot";
+    const auto fileExists = std::filesystem::exists(snapshotFilePath);
+    bool wasRemoved = false;
+    if (fileExists)
+    {
+        wasRemoved = std::filesystem::remove(snapshotFilePath);
+    }
 
-    CaraTest::IsTrue(fileExists);
-    CaraTest::IsTrue(wasRemoved);
-    CaraTest::AreEqual(expectedPasses, suite.passedTests());
-    CaraTest::AreEqual(expectedFails, suite.failedTests());
-    CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+    CaraTest::isTrue(fileExists);
+    CaraTest::isTrue(wasRemoved);
+    CaraTest::areEqual(expectedPasses, suite.passedTests());
+    CaraTest::areEqual(expectedFails, suite.failedTests());
+    CaraTest::areEqual(expectedSkips, suite.skippedTests());
 }
 
-static void EqualsFileDoesntCreateSnapshotWhenValuesAreEqual()
+static void EqualsFileDoesntCreateSnapshotWhenValuesareEqual()
 {
     int expectedPasses = 1;
     int expectedFails = 0;
     int expectedSkips = 0;
-    QString expectedValue("TestValue");
+    std::string expectedValue("TestValue");
 
     TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
     TestSuite suite{};
 
     const auto testFilePath = GenerateRandomFilePath();
-    CaraTest::File::WriteContent(testFilePath, expectedValue);
+    CaraTest::File::writeContent(testFilePath, expectedValue);
 
-    suite.add(QString(), [=]()
+    suite.add(std::string(), [=]()
         {
-            CaraTest::EqualsFile(QFileInfo(testFilePath), expectedValue);
+            CaraTest::equalsFile(testFilePath, expectedValue);
         });
     const auto result = runner.run(suite);
 
-    const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
-    auto snapshotFile = QFile(snapshotFilePath);
+    const auto snapshotFilePath = testFilePath.string() + ".snapshot";
+    const auto fileExists = std::filesystem::exists(snapshotFilePath);
+    bool wasRemoved = false;
+    if (fileExists)
+    {
+        wasRemoved = std::filesystem::remove(snapshotFilePath);
+    }
 
-    const auto fileExists = snapshotFile.exists();
-    const auto wasRemoved = snapshotFile.remove();
-
-    CaraTest::IsFalse(fileExists);
-    CaraTest::IsFalse(wasRemoved);
-    CaraTest::AreEqual(expectedPasses, suite.passedTests());
-    CaraTest::AreEqual(expectedFails, suite.failedTests());
-    CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+    CaraTest::isFalse(fileExists);
+    CaraTest::isFalse(wasRemoved);
+    CaraTest::areEqual(expectedPasses, suite.passedTests());
+    CaraTest::areEqual(expectedFails, suite.failedTests());
+    CaraTest::areEqual(expectedSkips, suite.skippedTests());
 }
 
 static void EqualsFileCreateSnapshotWhenValuesAreNotEqual()
@@ -662,90 +674,136 @@ static void EqualsFileCreateSnapshotWhenValuesAreNotEqual()
     int expectedPasses = 0;
     int expectedFails = 1;
     int expectedSkips = 0;
-    QString expectedValue("TestValue");
+    std::string expectedValue("TestValue");
 
     TestRunner runner{ 0, nullptr, TestRunner::OutputMode::None };
     TestSuite suite{};
 
     const auto testFilePath = GenerateRandomFilePath();
-    CaraTest::File::WriteContent(testFilePath, expectedValue);
+    CaraTest::File::writeContent(testFilePath, expectedValue);
 
-    suite.add(QString(), [=]()
+    suite.add(std::string(), [=]()
         {
-            CaraTest::EqualsFile(QFileInfo(testFilePath), QString("Some other Value"));
+            CaraTest::equalsFile(testFilePath, std::string("Some other Value"));
         });
     const auto result = runner.run(suite);
 
-    const auto snapshotFilePath = QDir::cleanPath(testFilePath + QString(".snapshot"));
-    auto snapshotFile = QFile(snapshotFilePath);
+    const auto snapshotFilePath = testFilePath.string() + ".snapshot";
+    const auto fileExists = std::filesystem::exists(snapshotFilePath);
+    bool wasRemoved = false;
+    if (fileExists)
+    {
+        wasRemoved = std::filesystem::remove(snapshotFilePath);
+    }
 
-    const auto fileExists = snapshotFile.exists();
-    const auto wasRemoved = snapshotFile.remove();
-
-    CaraTest::IsTrue(fileExists);
-    CaraTest::IsTrue(wasRemoved);
-    CaraTest::AreEqual(expectedPasses, suite.passedTests());
-    CaraTest::AreEqual(expectedFails, suite.failedTests());
-    CaraTest::AreEqual(expectedSkips, suite.skippedTests());
+    CaraTest::isTrue(fileExists);
+    CaraTest::isTrue(wasRemoved);
+    CaraTest::areEqual(expectedPasses, suite.passedTests());
+    CaraTest::areEqual(expectedFails, suite.failedTests());
+    CaraTest::areEqual(expectedSkips, suite.skippedTests());
 }
 
-TestSuite CaraTestTestsSuiteSimple()
-{
-    using namespace Simple;
 
-    TestSuite suite{};
-    suite.add(QString("TestCanExecute"), TestCanExecute);
-    suite.add(QString("TestCanPass"), TestCanPass);
-    suite.add(QString("TestCanFail"), TestCanFail);
-    suite.add(QString("TestCanBeSkipped"), TestCanBeSkipped);
-    suite.add(QString("TestSuitesReturnsAddedTests"), TestSuitesReturnsAddedTests);
-    suite.add(QString("TestContainsCallingTestName"), TestContainsCallingTestName);
-    suite.add(QString("TestIsTrueWhenTrue"), TestIsTrueWhenTrue);
-    suite.add(QString("TestIsTrueWhenFalse"), TestIsTrueWhenFalse);
-    suite.add(QString("TestIsFalseWhenFalse"), TestIsFalseWhenFalse);
-    suite.add(QString("TestIsFalseWhenTrue"), TestIsFalseWhenTrue);
-    suite.add(QString("TestAreEqualWhenTrueAndTrue"), TestAreEqualWhenTrueAndTrue);
-    suite.add(QString("TestAreEqualWhenFalseAndFalse"), TestAreEqualWhenFalseAndFalse);
-    suite.add(QString("TestAreEqualWhenTrueAndFalse"), TestAreEqualWhenTrueAndFalse);
-    suite.add(QString("TestAreEqualWhenZeroAndZero"), TestAreEqualWhenZeroAndZero);
-    suite.add(QString("TestAreEqualWhenOneAndOne"), TestAreEqualWhenOneAndOne);
-    suite.add(QString("TestAreEqualWhenOneAndZero"), TestAreEqualWhenOneAndZero);
-    suite.add(QString("TestAreEqualWhenEmptyStringAndEmptyString"), TestAreEqualWhenEmptyStringAndEmptyString);
-    suite.add(QString("TestAreEqualWhenStringAndSameString"), TestAreEqualWhenStringAndSameString);
-    suite.add(QString("TestAreEqualWhenStringAndDifferentString"), TestAreEqualWhenStringAndDifferentString);
-    suite.add(QString("TestRunnerExecutesTests"), TestRunnerExecutesTests);
 
-    return suite;
-}
+using namespace Simple;
+auto simple = CaraTest::getSuite("SimpleTests");
+auto simpleTest01 = simple->add("TestCanExecute", TestCanExecute);
+auto simpleTest02 = simple->add("TestCanPass", TestCanPass);
+auto simpleTest03 = simple->add("TestCanFail", TestCanFail);
+auto simpleTest04 = simple->add("TestCanBeSkipped", TestCanBeSkipped);
+auto simpleTest05 = simple->add("TestSuitesReturnsAddedTests", TestSuitesReturnsAddedTests);
+auto simpleTest06 = simple->add("TestContainsCallingTestName", TestContainsCallingTestName);
+auto simpleTest07 = simple->add("TestIsTrueWhenTrue", TestIsTrueWhenTrue);
+auto simpleTest08 = simple->add("TestIsTrueWhenFalse", TestIsTrueWhenFalse);
+auto simpleTest09 = simple->add("TestIsFalseWhenFalse", TestIsFalseWhenFalse);
+auto simpleTest10 = simple->add("TestIsFalseWhenTrue", TestIsFalseWhenTrue);
+auto simpleTest11 = simple->add("TestAreEqualWhenTrueAndTrue", TestAreEqualWhenTrueAndTrue);
+auto simpleTest12 = simple->add("TestAreEqualWhenFalseAndFalse", TestAreEqualWhenFalseAndFalse);
+auto simpleTest13 = simple->add("TestAreEqualWhenTrueAndFalse", TestAreEqualWhenTrueAndFalse);
+auto simpleTest14 = simple->add("TestAreEqualWhenZeroAndZero", TestAreEqualWhenZeroAndZero);
+auto simpleTest15 = simple->add("TestAreEqualWhenOneAndOne", TestAreEqualWhenOneAndOne);
+auto simpleTest16 = simple->add("TestAreEqualWhenOneAndZero", TestAreEqualWhenOneAndZero);
+auto simpleTest17 = simple->add("TestAreEqualWhenEmptyStringAndEmptyString", TestAreEqualWhenEmptyStringAndEmptyString);
+auto simpleTest18 = simple->add("TestAreEqualWhenStringAndSameString", TestAreEqualWhenStringAndSameString);
+auto simpleTest19 = simple->add("TestAreEqualWhenStringAndDifferentString", TestAreEqualWhenStringAndDifferentString);
+auto simpleTest20 = simple->add("TestRunnerExecutesTests", TestRunnerExecutesTests);
+auto simpleTest21 = simple->add("TestCanExecute", TestCanExecute);
+auto simpleTest22 = simple->add("TestCanPass", TestCanPass);
+auto simpleTest23 = simple->add("TestCanFail", TestCanFail);
+auto simpleTest24 = simple->add("TestCanBeSkipped", TestCanBeSkipped);
+auto simpleTest25 = simple->add("TestSuitesReturnsAddedTests", TestSuitesReturnsAddedTests);
+auto simpleTest26 = simple->add("TestContainsCallingTestName", TestContainsCallingTestName);
+auto simpleTest27 = simple->add("TestIsTrueWhenTrue", TestIsTrueWhenTrue);
+auto simpleTest28 = simple->add("TestIsTrueWhenFalse", TestIsTrueWhenFalse);
+auto simpleTest29 = simple->add("TestIsFalseWhenFalse", TestIsFalseWhenFalse);
+auto simpleTest30 = simple->add("TestIsFalseWhenTrue", TestIsFalseWhenTrue);
+auto simpleTest31 = simple->add("TestAreEqualWhenTrueAndTrue", TestAreEqualWhenTrueAndTrue);
+auto simpleTest32 = simple->add("TestAreEqualWhenFalseAndFalse", TestAreEqualWhenFalseAndFalse);
+auto simpleTest33 = simple->add("TestAreEqualWhenTrueAndFalse", TestAreEqualWhenTrueAndFalse);
+auto simpleTest34 = simple->add("TestAreEqualWhenZeroAndZero", TestAreEqualWhenZeroAndZero);
+auto simpleTest35 = simple->add("TestAreEqualWhenOneAndOne", TestAreEqualWhenOneAndOne);
+auto simpleTest36 = simple->add("TestAreEqualWhenOneAndZero", TestAreEqualWhenOneAndZero);
+auto simpleTest37 = simple->add("TestAreEqualWhenEmptyStringAndEmptyString", TestAreEqualWhenEmptyStringAndEmptyString);
+auto simpleTest38 = simple->add("TestAreEqualWhenStringAndSameString", TestAreEqualWhenStringAndSameString);
+auto simpleTest39 = simple->add("TestAreEqualWhenStringAndDifferentString", TestAreEqualWhenStringAndDifferentString);
+auto simpleTest40 = simple->add("TestRunnerExecutesTests", TestRunnerExecutesTests);
+auto simpleTest41 = simple->add("TestCanExecute", TestCanExecute);
+auto simpleTest42 = simple->add("TestCanPass", TestCanPass);
+auto simpleTest43 = simple->add("TestCanFail", TestCanFail);
+auto simpleTest44 = simple->add("TestCanBeSkipped", TestCanBeSkipped);
+auto simpleTest45 = simple->add("TestSuitesReturnsAddedTests", TestSuitesReturnsAddedTests);
+auto simpleTest46 = simple->add("TestContainsCallingTestName", TestContainsCallingTestName);
+auto simpleTest47 = simple->add("TestIsTrueWhenTrue", TestIsTrueWhenTrue);
+auto simpleTest48 = simple->add("TestIsTrueWhenFalse", TestIsTrueWhenFalse);
+auto simpleTest49 = simple->add("TestIsFalseWhenFalse", TestIsFalseWhenFalse);
+auto simpleTest50 = simple->add("TestIsFalseWhenTrue", TestIsFalseWhenTrue);
+auto simpleTest51 = simple->add("TestAreEqualWhenTrueAndTrue", TestAreEqualWhenTrueAndTrue);
+auto simpleTest52 = simple->add("TestAreEqualWhenFalseAndFalse", TestAreEqualWhenFalseAndFalse);
+auto simpleTest53 = simple->add("TestAreEqualWhenTrueAndFalse", TestAreEqualWhenTrueAndFalse);
+auto simpleTest54 = simple->add("TestAreEqualWhenZeroAndZero", TestAreEqualWhenZeroAndZero);
+auto simpleTest55 = simple->add("TestAreEqualWhenOneAndOne", TestAreEqualWhenOneAndOne);
+auto simpleTest56 = simple->add("TestAreEqualWhenOneAndZero", TestAreEqualWhenOneAndZero);
+auto simpleTest57 = simple->add("TestAreEqualWhenEmptyStringAndEmptyString", TestAreEqualWhenEmptyStringAndEmptyString);
+auto simpleTest58 = simple->add("TestAreEqualWhenStringAndSameString", TestAreEqualWhenStringAndSameString);
+auto simpleTest59 = simple->add("TestAreEqualWhenStringAndDifferentString", TestAreEqualWhenStringAndDifferentString);
+auto simpleTest60 = simple->add("TestRunnerExecutesTests", TestRunnerExecutesTests);
+auto simpleTest61 = simple->add("TestCanExecute", TestCanExecute);
+auto simpleTest62 = simple->add("TestCanPass", TestCanPass);
+auto simpleTest63 = simple->add("TestCanFail", TestCanFail);
+auto simpleTest64 = simple->add("TestCanBeSkipped", TestCanBeSkipped);
+auto simpleTest65 = simple->add("TestSuitesReturnsAddedTests", TestSuitesReturnsAddedTests);
+auto simpleTest66 = simple->add("TestContainsCallingTestName", TestContainsCallingTestName);
+auto simpleTest67 = simple->add("TestIsTrueWhenTrue", TestIsTrueWhenTrue);
+auto simpleTest68 = simple->add("TestIsTrueWhenFalse", TestIsTrueWhenFalse);
+auto simpleTest69 = simple->add("TestIsFalseWhenFalse", TestIsFalseWhenFalse);
+auto simpleTest70 = simple->add("TestIsFalseWhenTrue", TestIsFalseWhenTrue);
+auto simpleTest71 = simple->add("TestAreEqualWhenTrueAndTrue", TestAreEqualWhenTrueAndTrue);
+auto simpleTest72 = simple->add("TestAreEqualWhenFalseAndFalse", TestAreEqualWhenFalseAndFalse);
+auto simpleTest73 = simple->add("TestAreEqualWhenTrueAndFalse", TestAreEqualWhenTrueAndFalse);
+auto simpleTest74 = simple->add("TestAreEqualWhenZeroAndZero", TestAreEqualWhenZeroAndZero);
+auto simpleTest75 = simple->add("TestAreEqualWhenOneAndOne", TestAreEqualWhenOneAndOne);
+auto simpleTest76 = simple->add("TestAreEqualWhenOneAndZero", TestAreEqualWhenOneAndZero);
+auto simpleTest77 = simple->add("TestAreEqualWhenEmptyStringAndEmptyString", TestAreEqualWhenEmptyStringAndEmptyString);
+auto simpleTest78 = simple->add("TestAreEqualWhenStringAndSameString", TestAreEqualWhenStringAndSameString);
+auto simpleTest79 = simple->add("TestAreEqualWhenStringAndDifferentString", TestAreEqualWhenStringAndDifferentString);
+auto simpleTest80 = simple->add("TestRunnerExecutesTests", TestRunnerExecutesTests);
 
-TestSuite CaraTestTestsSuiteParameterized()
-{
-    using namespace Parameterized;
 
-    TestSuite suite{};
-    suite.add(QString("TestCanExecuteWithParameters"), TestCanExecuteWithParameters, TestCanExecuteWithParameters_Data);
-    suite.add(QString("TestWithTwoEmptySubTestsHasTwoPasses"), TestWithTwoEmptySubTestsHasTwoPasses);
-    suite.add(QString("TestWithSkipOnTrueInThreeSubTestsHasTwoPassesAndOneSkip"), TestWithSkipOnTrueInThreeSubTestsHasTwoPassesAndOneSkip);
-    suite.add(QString("TestWithFailInTwoSubTestsHasTwoFails"), TestWithFailInTwoSubTestsHasTwoFails);
-    suite.add(QString("TestWithIsTrueCheckInTwoSubTestsHasOnePassAndOneFails"), TestWithIsTrueCheckInTwoSubTestsHasOnePassAndOneFails);
-    suite.add(QString("TestWithSkipOnTrueAndFailHasOneSkipAndTwoFails"), TestWithSkipOnTrueAndFailHasOneSkipAndTwoFails);
-    suite.add(QString("TestWithSkipInTwoSubTestsHasTwoSkips"), TestWithSkipInTwoSubTestsHasTwoSkips);
-    suite.add(QString("TestWithoutDataDontExecute"), TestWithoutDataDontExecute);
 
-    return suite;
-}
+using namespace Parameterized;
+auto parameter = CaraTest::getSuite("ParameterTests");
+auto parameterTest1 = parameter->add("TestCanExecuteWithParameters", TestCanExecuteWithParameters, TestCanExecuteWithParameters_Data);
+auto parameterTest2 = parameter->add("TestWithTwoEmptySubTestsHasTwoPasses", TestWithTwoEmptySubTestsHasTwoPasses);
+auto parameterTest3 = parameter->add("TestWithSkipOnTrueInThreeSubTestsHasTwoPassesAndOneSkip", TestWithSkipOnTrueInThreeSubTestsHasTwoPassesAndOneSkip);
+auto parameterTest4 = parameter->add("TestWithFailInTwoSubTestsHasTwoFails", TestWithFailInTwoSubTestsHasTwoFails);
+auto parameterTest5 = parameter->add("TestWithIsTrueCheckInTwoSubTestsHasOnePassAndOneFails", TestWithIsTrueCheckInTwoSubTestsHasOnePassAndOneFail);
+auto parameterTest6 = parameter->add("TestWithSkipOnTrueAndFailHasOneSkipAndTwoFails", TestWithSkipOnTrueAndFailHasOneSkipAndTwoFails);
+auto parameterTest7 = parameter->add("TestWithSkipInTwoSubTestsHasTwoSkips", TestWithSkipInTwoSubTestsHasTwoSkips);
+auto parameterTest8 = parameter->add("TestWithoutDataDontExecute", TestWithoutDataDontExecute);
 
-TestSuite CaraTestSnapshotTestsSuite()
-{
-    TestSuite suite{};
-    suite.add(QString("EqualsFileCreatesSnapshotWhenFileDoesNotExist"), EqualsFileCreatesSnapshotWhenFileDoesNotExist);
-    suite.add(QString("EqualsFileDoesntCreateSnapshotWhenValuesAreEqual"), EqualsFileDoesntCreateSnapshotWhenValuesAreEqual);
-    suite.add(QString("EqualsFileCreateSnapshotWhenValuesAreNotEqual"), EqualsFileCreateSnapshotWhenValuesAreNotEqual);
 
-    return suite;
-}
 
-QList<TestSuite> CaraTestTestsSuite()
-{
-    return QList<TestSuite>() << CaraTestTestsSuiteSimple() << CaraTestTestsSuiteParameterized() << CaraTestSnapshotTestsSuite();
-}
+auto snapshot = CaraTest::getSuite("SnapshotTests");
+auto snapshotTest1 = snapshot->add("EqualsFileCreatesSnapshotWhenFileDoesNotExist", EqualsFileCreatesSnapshotWhenFileDoesNotExist);
+auto snapshotTest2 = snapshot->add("EqualsFileDoesntCreateSnapshotWhenValuesareEqual", EqualsFileDoesntCreateSnapshotWhenValuesareEqual);
+auto snapshotTest3 = snapshot->add("EqualsFileCreateSnapshotWhenValuesAreNotEqual", EqualsFileCreateSnapshotWhenValuesAreNotEqual);

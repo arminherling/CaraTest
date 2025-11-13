@@ -1,4 +1,4 @@
-#include "DiffHighlighter.h"
+﻿#include "DiffHighlighter.h"
 
 DiffHighlighter::DiffHighlighter(CaraTest::DiffChange diffChange, const QColor& color, QTextDocument* parent)
     : QSyntaxHighlighter(parent)
@@ -8,7 +8,7 @@ DiffHighlighter::DiffHighlighter(CaraTest::DiffChange diffChange, const QColor& 
     m_format.setFontUnderline(true);
 }
 
-void DiffHighlighter::highlightDiffs(const QList<CaraTest::DiffLocation>& differences)
+void DiffHighlighter::highlightDiffs(const std::vector<CaraTest::DiffLocation>& differences)
 {
     m_differences = differences;
     rehighlight();

@@ -1,11 +1,14 @@
-project(CaraTestTests)
+﻿project(CaraTestTests)
 
-file(GLOB SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/source/*.cpp")
-file(GLOB HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/source/*.h")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/source/*.cpp")
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/source/*.h")
 
-qt_add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME} PRIVATE CaraTest)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE CaraTest Qt6::Core)
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /utf-8 /WX /diagnostics:caret)
+endif()
 
 if (WIN32)
     add_custom_command(
@@ -14,4 +17,4 @@ if (WIN32)
             $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
         COMMAND_EXPAND_LISTS
     )
-endif ()
+endif()

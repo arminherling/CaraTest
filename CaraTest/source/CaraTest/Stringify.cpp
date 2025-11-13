@@ -1,44 +1,35 @@
 ﻿#include "Stringify.h"
-#include <QTextStream>
+#include <sstream>
+#include <iomanip>
 
 namespace CaraTest
 {
-    QString Stringify(bool value)
+    std::string stringify(bool value)
     {
-        return value ? QString("true") : QString("false");
+        return value ? "true" : "false";
     }
 
-    QString Stringify(int value)
+    std::string stringify(int value)
     {
-        return QString::number(value);
+        return std::to_string(value);
     }
 
-    QString Stringify(long long value)
+    std::string stringify(long long value)
     {
-        return QString::number(value);
+        return std::to_string(value);
     }
 
-    QString Stringify(const char* str)
+    std::string stringify(const char* str)
     {
-        return QString::fromLocal8Bit(str);        
+        return std::string(str);
     }
 
-    QString Stringify(const QString& string)
+    std::string stringify(const std::string& string)
     {
         return string;
     }
 
-    QString Stringify(const QStringView stringView)
-    {
-        return stringView.toString();
-    }
-
-    QString Stringify(const std::string& string)
-    {
-        return QString::fromStdString(string);
-    }
-
-    QString Stringify(const std::chrono::nanoseconds& input)
+    std::string stringify(const std::chrono::nanoseconds& input)
     {
         auto ns = input;
 
@@ -51,42 +42,45 @@ namespace CaraTest
         auto us = duration_cast<microseconds>(ns);
         ns -= us;
 
-        QString output;
-        QTextStream stream{ &output };
+        std::ostringstream stream;
+        stream << s.count() << "s ";
+        stream << std::setw(3) << std::setfill('0') << ms.count() << "ms ";
+        stream << std::setw(3) << std::setfill('0') << us.count() << "μs ";
+        stream << std::setw(3) << std::setfill('0') << ns.count() << "ns";
 
-        stream << s.count() << QString("s ");
-        stream << QString::number(ms.count()).rightJustified(3, '0') << QString("ms ");
-        stream << QString::number(us.count()).rightJustified(3, '0') << QString("μs ");
-        stream << QString::number(ns.count()).rightJustified(3, '0') << QString("ns");
-
-        return output;
+        return stream.str();
     }
 
-    QString StringifyAndQuoted(const char* str)
+    std::string stringifyAndQuoted(const char* str)
     {
-        return QString("\"%1\"").arg(QString::fromLocal8Bit(str));
+        return "\"" + std::string(str) + "\"";
     }
 
-    QString StringifyAndQuoted(const QString& string)
+    std::string stringifyAndQuoted(const std::string& string)
     {
-        return QString("\"%1\"").arg(string);
+        return "\"" + string + "\"";
     }
 
-    QString StringifyAndQuoted(const QStringView stringView)
+    std::string sanitize(const std::string& input)
     {
-        return StringifyAndQuoted(stringView.toString());
-    }
+        const std::vector<std::pair<char, std::string>> replacements = {
+            {'\t', "\\t"},
+            {'\r', "\\r"},
+            {'\n', "\\n"}
+        };
 
-    QString StringifyAndQuoted(const std::string& string)
-    {
-        return QString("\"%1\"").arg(QString::fromStdString(string));
-    }
+        std::string result = input;
+        for (const auto& [target, replacement] : replacements)
+        {
+            size_t pos = 0;
+            while ((pos = result.find(target, pos)) != std::string::npos)
+            {
+                result.replace(pos, 1, replacement);
+                // move past the replacement
+                pos += replacement.length();
+            }
+        }
 
-    QString Sanitize(QString input)
-    {
-        input.replace(QChar('\t'), QString("\\t"));
-        input.replace(QChar('\r'), QString("\\r"));
-        input.replace(QChar('\n'), QString("\\n"));
-        return input;
+        return result;
     }
 }

@@ -1,42 +1,34 @@
 #include "File.h"
+#include <fstream>
+#include <sstream>
 
-#include <QtCore/QFile>
-#include <QtCore/QDir>
-
-namespace CaraTest
+namespace CaraTest::File
 {
-    namespace File
+    std::optional<std::string> readContent(const std::filesystem::path& filePath)
     {
-        QString ReadContent(const QString& filePath)
-        {
-            return ReadContent(QFileInfo(filePath));
+        if (!std::filesystem::exists(filePath)) {
+            return std::nullopt;
         }
 
-        QString ReadContent(const QFileInfo& fileInfo)
-        {
-            const auto filePath = fileInfo.absoluteFilePath();
-            auto file = QFile(filePath);
-            file.open(QIODevice::ReadOnly);
-            return QString(file.readAll());
+        std::ifstream file(filePath, std::ios::in | std::ios::binary);
+        if (!file.is_open()) {
+            return std::nullopt;
         }
 
-        bool WriteContent(const QString& filePath, const QString& content)
-        {
-            const auto cleanedFilePath = QDir::cleanPath(filePath);
-            auto file = QFile(cleanedFilePath);
-            const auto isOpen = file.open(QIODevice::WriteOnly);
-            if (!isOpen)
-            {
-                return false;
-            }
+        std::ostringstream contentStream;
+        contentStream << file.rdbuf();
+        return contentStream.str();
+    }
 
-            QTextStream stream(&file);
-            stream.setEncoding(QStringConverter::Utf8);
-            stream.setGenerateByteOrderMark(true);
-            stream << content;
-            file.close();
-
-            return true;
+    bool writeContent(const std::filesystem::path& filePath, const std::string& content)
+    {
+        std::ofstream file(filePath, std::ios::out | std::ios::binary);
+        if (!file.is_open()) {
+            return false;
         }
+
+        file << content;
+        file.close();
+        return true;
     }
 }

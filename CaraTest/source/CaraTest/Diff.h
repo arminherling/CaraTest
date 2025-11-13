@@ -1,11 +1,24 @@
 #pragma once
 
 #include <CaraTest/API.h>
-#include <CaraTest/DiffLocation.h>
-#include <QString>
-#include <QList>
+#include <string>
+#include <vector>
 
 namespace CaraTest 
 {
-    CARATEST_API QList<DiffLocation> Diff(const QString& first, const QString& second);
+    enum class DiffChange
+    {
+        Unknown,
+        Addition,
+        Deletion
+    };
+
+    struct CARATEST_API DiffLocation
+    {
+        int startIndex = 0;
+        int endIndex = 0;
+        DiffChange change = DiffChange::Unknown;
+    };
+
+    CARATEST_API std::vector<DiffLocation> diff(const std::string& first, const std::string& second);
 }

@@ -1,27 +1,22 @@
-#pragma once
+﻿#pragma once
 
 #include <CaraTest/API.h>
-#include <CaraTest/FailureBehavior.h>
 #include <CaraTest/Stringify.h>
-#include <CaraTest/ValueMismatchTestException.h>
-#include <CaraTest/SnapshotCreatedTestException.h>
+#include <CaraTest/StringifyForQt.h>
+#include <CaraTest/HelperExceptions.h>
 #include <CaraTest/File.h>
-
-#include <QString>
-#include <QFileInfo>
-#include <QDir>
-
-#include <source_location>
+#include <CaraTest/Tests.h>
+#include <filesystem>
 
 namespace CaraTest
 {
-    CARATEST_API void Fail(const std::source_location& location = std::source_location::current());
-    CARATEST_API void Skip(const std::source_location& location = std::source_location::current());
-    CARATEST_API void IsTrue(bool value, const std::source_location& location = std::source_location::current());
-    CARATEST_API void IsFalse(bool value, const std::source_location& location = std::source_location::current());
+    CARATEST_API void fail(const std::source_location& location = std::source_location::current());
+    CARATEST_API void skip(const std::source_location& location = std::source_location::current());
+    CARATEST_API void isTrue(bool value, const std::source_location& location = std::source_location::current());
+    CARATEST_API void isFalse(bool value, const std::source_location& location = std::source_location::current());
 
     template<class T1, class T2>
-    void AreEqual(
+    void areEqual(
         T1&& expectedValue, 
         T2&& actualValue, 
         const std::source_location& location = std::source_location::current())
@@ -30,8 +25,8 @@ namespace CaraTest
         {
             HANDLE_CARATEST_FAILURE();
             throw ValueMismatchTestException(
-                StringifyAndMaybeQuote(expectedValue),
-                StringifyAndMaybeQuote(actualValue),
+                stringifyAndMaybeQuote(expectedValue),
+                stringifyAndMaybeQuote(actualValue),
                 location,
                 ValueMismatchTestException::OutputMode::Diff
             );
@@ -39,41 +34,53 @@ namespace CaraTest
     }
 
     template<class T1>
-    void EqualsFile(
-        const QFileInfo& expectedContentFilePath, 
+    void equalsFile(
+        const std::filesystem::path& expectedContentFilePath, 
         T1&& actualValue, 
         const std::source_location& location = std::source_location::current())
     {
-        const auto stringifiedActualValue = Stringify(actualValue);
-        if (!expectedContentFilePath.exists())
+        const auto stringifiedActualValue = stringify(actualValue);
+
+        if (!std::filesystem::exists(expectedContentFilePath))
         {
-            const auto snapshotFilePath = QDir::cleanPath(expectedContentFilePath.absoluteFilePath() + QString(".snapshot"));
-            File::WriteContent(snapshotFilePath, stringifiedActualValue);
+            const auto snapshotFilePath = expectedContentFilePath.string() + ".snapshot";
+            File::writeContent(snapshotFilePath, stringifiedActualValue);
 
             HANDLE_CARATEST_FAILURE();
-            throw SnapshotCreatedTestException(QString(), StringifyAndMaybeQuote(actualValue), snapshotFilePath, location);
+            throw SnapshotCreatedTestException(
+                std::string(), 
+                stringifyAndMaybeQuote(actualValue), 
+                snapshotFilePath, 
+                location
+            );
         }
 
-        const auto fileContent = File::ReadContent(expectedContentFilePath);
+        const auto fileContent = File::readContent(expectedContentFilePath);
         if (actualValue != fileContent)
         {
-            const auto snapshotFilePath = QDir::cleanPath(expectedContentFilePath.absoluteFilePath() + QString(".snapshot"));
-            File::WriteContent(snapshotFilePath, stringifiedActualValue);
+            const auto snapshotFilePath = expectedContentFilePath.string() + ".snapshot";
+            File::writeContent(snapshotFilePath, stringifiedActualValue);
 
             HANDLE_CARATEST_FAILURE();
-            throw SnapshotCreatedTestException(StringifyAndMaybeQuote(fileContent), StringifyAndMaybeQuote(actualValue), snapshotFilePath, location);
+            throw SnapshotCreatedTestException(
+                stringifyAndMaybeQuote(fileContent), 
+                stringifyAndMaybeQuote(actualValue), 
+                snapshotFilePath, 
+                location
+            );
         }
     }
 }
 
-#define CARATEST_TRIGGER_BREAK_ON_MATCH(firstValue, secondValue)                                                    \
+#define CARATEST_DEBUG_BREAK_ON_PARTIAL_MATCH(firstValue, secondValue)                                              \
     do {                                                                                                            \
         if ((firstValue) == (secondValue)) {                                                                        \
             TRIGGER_DEBUG_BREAK();                                                                                  \
         } else  {                                                                                                   \
-            const auto _firstStringified = StringifyAndMaybeQuote(firstValue);                                      \
-            const auto _secondStringified = StringifyAndMaybeQuote(secondValue);                                    \
-            if (_firstStringified.contains(_secondStringified) || _secondStringified.contains(_firstStringified)) { \
+            const auto _firstStringified = stringifyAndMaybeQuote(firstValue);                                      \
+            const auto _secondStringified = stringifyAndMaybeQuote(secondValue);                                    \
+            if (_firstStringified.find(_secondStringified) != std::string::npos ||                                  \
+                _secondStringified.find(_firstStringified) != std::string::npos) {                                  \
                 TRIGGER_DEBUG_BREAK();                                                                              \
             }                                                                                                       \
         }                                                                                                           \

@@ -10,17 +10,17 @@ namespace CaraTest
         TestRunnerConsoleOutput();
         ~TestRunnerConsoleOutput() override = default;
 
-        void writeSuiteName(const QString& name) override;
-        QPoint writeTestHeader(int currentTest, int totalTests, const QString& testName, bool hasSubTests) override;
-        QPoint writeSubTestHeader(int indentation, int currentTest, int totalTests, const QString& parameters) override;
-        void updateTestResult(const QPoint& position, TestResultKind result) override;
+        void writeSuiteName(const std::string& name) override;
+        Position writeTestHeader(int currentTest, int totalTests, const std::string& testName, bool hasSubTests) override;
+        Position writeSubTestHeader(int indentation, int currentTest, int totalTests, const std::string& parameters) override;
+        void updateTestResult(const Position& position, TestResultKind result) override;
         void writeTestPassedMessage() override;
         void writeTestSkippedMessage(SkipTestException& e) override;
         void writeTestFailedMessage(FailedTestException& e) override;
         void writeTestValueMismatchMessage(ValueMismatchTestException& e) override;
         void writeSnapshotCreatedMessage(SnapshotCreatedTestException& e) override;
         void writeTestRunnerResult(const TestSuiteResult& result) override;
-        void writeTestRunnerTotalResult(const QList<TestSuiteResult>& results) override;
+        void writeTestRunnerTotalResult(const std::vector<TestSuiteResult>& results) override;
         void writeEmptyLine() override;
 
     private:

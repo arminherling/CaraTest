@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include <CaraTest/API.h>
 #include <chrono>
-#include <QString>
+#include <string>
 #include <tuple>
+#include <sstream>
 
 namespace CaraTest
 {
@@ -17,65 +18,63 @@ namespace CaraTest
     struct is_string_like<const char*> : std::true_type {};
 
     template<>
-    struct is_string_like<QString> : std::true_type {};
-
-    template<>
-    struct is_string_like<QStringView> : std::true_type {};
-
-    template<>
     struct is_string_like<std::string> : std::true_type {};
 
     template<typename T>
     constexpr bool is_string_like_v = is_string_like<std::decay_t<T>>::value;
 
-    CARATEST_API QString Stringify(bool value);
-    CARATEST_API QString Stringify(int value);
-    CARATEST_API QString Stringify(long long value);
-    CARATEST_API QString Stringify(const char* str);
-    CARATEST_API QString Stringify(const QString& string);
-    CARATEST_API QString Stringify(const QStringView stringView);
-    CARATEST_API QString Stringify(const std::string& string);
-    CARATEST_API QString Stringify(const std::chrono::nanoseconds& ns);
+    CARATEST_API std::string stringify(bool value);
+    CARATEST_API std::string stringify(int value);
+    CARATEST_API std::string stringify(long long value);
+    CARATEST_API std::string stringify(const char* str);
+    CARATEST_API std::string stringify(const std::string& string);
+    CARATEST_API std::string stringify(const std::chrono::nanoseconds& ns);
 
     template<class T>
-    QString Stringify(const T& t)
+    std::string stringify(const T& t)
     {
-        return QString("?");
+        return std::string("?");
     }
 
     template<class ...Ts>
-    QString Stringify(const std::tuple<Ts...>& tuple)
+    std::string stringify(const std::tuple<Ts...>& tuple)
     {
-        auto converter = [](const auto& ...args) { return QStringList{ Stringify(args)... }; };
+        auto converter = [](const auto& ...args) { return std::vector<std::string>{ stringify(args)... }; };
         auto parts = std::apply(converter, tuple);
-        return QString("(%1)").arg(parts.join(", "));
+        return std::string("(") + join(parts, ", ") + ")";
     }
 
-    CARATEST_API QString StringifyAndQuoted(const char* str);
-    CARATEST_API QString StringifyAndQuoted(const QString& string);
-    CARATEST_API QString StringifyAndQuoted(const QStringView stringView);
-    CARATEST_API QString StringifyAndQuoted(const std::string& string);
+    CARATEST_API std::string stringifyAndQuoted(const char* str);
+    CARATEST_API std::string stringifyAndQuoted(const std::string& string);
 
     template<class T>
-    QString StringifyAndMaybeQuote(const T& t)
+    std::string stringifyAndMaybeQuote(const T& t)
     {
         if constexpr (is_string_like_v<T>)
         {
-            return StringifyAndQuoted(t);
+            return stringifyAndQuoted(t);
         }
         else
         {
-            return Stringify(t);
+            return stringify(t);
         }
     }
 
     template<class ...Ts>
-    QString StringifyAndMaybeQuote(const std::tuple<Ts...>& tuple)
+    std::string stringifyAndMaybeQuote(const std::tuple<Ts...>& tuple)
     {
-        auto converter = [](const auto& ...args) { return QStringList{ StringifyAndMaybeQuote(args)... }; };
+        auto converter = [](const auto& ...args) { return std::vector<std::string>{ stringifyAndMaybeQuote(args)... }; };
         auto parts = std::apply(converter, tuple);
-        return QString("(%1)").arg(parts.join(", "));
+
+        std::stringstream joinedPartsStream;
+        for (const auto& part : parts) {
+            if (!joinedPartsStream.str().empty()) {
+                joinedPartsStream << ", ";
+            }
+            joinedPartsStream << part;
+        }
+        return "(" + joinedPartsStream.str() + ")";
     }
 
-    CARATEST_API QString Sanitize(QString input);
+    CARATEST_API std::string sanitize(const std::string& input);
 }

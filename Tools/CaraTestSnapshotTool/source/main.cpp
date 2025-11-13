@@ -1,7 +1,7 @@
-#include <QtWidgets/QApplication>
+﻿#include <QtWidgets/QApplication>
 
 #include "SnapshotToolWindow.h"
-#include <CaraTest/File.h>
+#include "FileHelper.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 {
     QApplication application(argc, argv);
 
-    const auto styleSheet = CaraTest::File::ReadContent(":/styles/darkmode.qss");
+    const auto styleSheet = ReadStyleContent(":/styles/darkmode.qss");
     application.setStyleSheet(styleSheet);
 
     SnapshotToolWindow window;

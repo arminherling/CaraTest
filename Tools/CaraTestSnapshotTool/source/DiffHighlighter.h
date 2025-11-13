@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include <CaraTest/Diff.h>
 
 #include <QSyntaxHighlighter>
-#include <QList>
+#include <vector>
 
 class DiffHighlighter : public QSyntaxHighlighter
 {
@@ -12,14 +12,14 @@ class DiffHighlighter : public QSyntaxHighlighter
 public:
     DiffHighlighter(CaraTest::DiffChange diffChange, const QColor& color, QTextDocument* parent = nullptr);
 
-    void highlightDiffs( const QList<CaraTest::DiffLocation>& differences);
+    void highlightDiffs(const std::vector<CaraTest::DiffLocation>& differences);
     void clear();
 
 protected:
     void highlightBlock(const QString& text) override;
 
 private:
-    QList<CaraTest::DiffLocation> m_differences;
+    std::vector<CaraTest::DiffLocation> m_differences;
     CaraTest::DiffChange m_diffChange;
     QTextCharFormat m_format;
 };

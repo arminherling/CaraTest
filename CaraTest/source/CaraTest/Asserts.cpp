@@ -1,36 +1,33 @@
 #include "Asserts.h"
 
-#include <CaraTest/FailedTestException.h>
-#include <CaraTest/SkipTestException.h>
-
 namespace CaraTest
 {
-    void Fail(const std::source_location& location)
+    void fail(const std::source_location& location)
     {
         HANDLE_CARATEST_FAILURE();
         throw FailedTestException(location);
     }
 
-    void Skip(const std::source_location& location)
+    void skip(const std::source_location& location)
     {
         throw SkipTestException(location);
     }
 
-    void IsTrue(bool value, const std::source_location& location)
+    void isTrue(bool value, const std::source_location& location)
     {
         if (value != true)
         {
             HANDLE_CARATEST_FAILURE();
-            throw ValueMismatchTestException(Stringify(true), Stringify(value), location, ValueMismatchTestException::OutputMode::All);
+            throw ValueMismatchTestException(stringify(true), stringify(value), location, ValueMismatchTestException::OutputMode::All);
         }
     }
 
-    void IsFalse(bool value, const std::source_location& location)
+    void isFalse(bool value, const std::source_location& location)
     {
         if (value != false)
         {
             HANDLE_CARATEST_FAILURE();
-            throw ValueMismatchTestException(Stringify(false), Stringify(value), location, ValueMismatchTestException::OutputMode::All);
+            throw ValueMismatchTestException(stringify(false), stringify(value), location, ValueMismatchTestException::OutputMode::All);
         }
     }
 }

@@ -1,19 +1,16 @@
-#include "Diff.h"
-
-#include <vector>
+#include <CaraTest/Diff.h>
 #include <algorithm>
-#include <QSet>
 
 namespace CaraTest
 {
-    QList<DiffLocation> Diff(const QString& first, const QString& second)
+    std::vector<DiffLocation> diff(const std::string& first, const std::string& second)
     {
-        QList<DiffLocation> differences;
+        std::vector<DiffLocation> differences;
 
-        if (first.isNull() || second.isNull())
+        if (first.empty() || second.empty())
             return differences;
 
-        if (first == second && first.isEmpty())
+        if (first == second)
             return differences;
 
         const int firstLength = first.size();
@@ -45,12 +42,12 @@ namespace CaraTest
             }
             else if (j > 0 && (i == 0 || lengthTable[i][j - 1] >= lengthTable[i - 1][j]))
             {
-                differences.append(DiffLocation{ .startIndex = j - 1, .endIndex = j - 1, .change = DiffChange::Addition });
+                differences.push_back(DiffLocation{ .startIndex = j - 1, .endIndex = j - 1, .change = DiffChange::Addition });
                 --j;
             }
             else
             {
-                differences.append(DiffLocation{ .startIndex = i - 1, .endIndex = i - 1, .change = DiffChange::Deletion });
+                differences.push_back(DiffLocation{ .startIndex = i - 1, .endIndex = i - 1, .change = DiffChange::Deletion });
                 --i;
             }
         }

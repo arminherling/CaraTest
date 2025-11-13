@@ -1,5 +1,6 @@
-#include "SnapshotToolWindow.h"
+﻿#include "SnapshotToolWindow.h"
 #include "DiffHighlighter.h"
+#include "FileHelper.h"
 
 #include <CaraTest/Diff.h>
 #include <CaraTest/File.h>
@@ -23,6 +24,8 @@
 #include <QtGui/QFileSystemModel>
 #include <QtGui/QShowEvent>
 
+#include <filesystem>
+
 namespace
 {
     const auto ToolName = QString("CaraTest Snapshot Tool");
@@ -41,29 +44,30 @@ namespace
         messageBox.exec();
     }
 
-    static QFileInfo GetOriginFileInfoForSnapshot(const QFileInfo& fileInfo)
+    static std::filesystem::path GetOriginFileInfoForSnapshot(const std::filesystem::path& filePath)
     {
-        const auto directory = fileInfo.dir();
-        const auto completeBaseName = fileInfo.completeBaseName();
-        const auto originPath = directory.filePath(completeBaseName);
-        return QFileInfo(originPath);
+        const auto directory = filePath.parent_path();
+        const auto completeBaseName = filePath.stem(); // Gets the base name without extension
+        const auto originPath = directory / completeBaseName; // Constructs the origin path
+        return originPath;
     }
 
-    static QString GetSettingsFilePath()
+    static std::filesystem::path GetSettingsFilePath()
     {
-        const auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        QDir().mkpath(appDataDir); // Ensure the directory exists
+        const auto appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString();
+        std::filesystem::create_directories(appDataDir); // Ensure the directory exists
 
-        const auto filePath = QDir(appDataDir).filePath("snapshot_tool_settings.json");
+        const auto filePath = std::filesystem::path(appDataDir) / "snapshot_tool_settings.json";
         return filePath;
     }
 
     static QString LoadLastDirectory()
     {
-        const auto fileContent = CaraTest::File::ReadContent(GetSettingsFilePath());
-        if (fileContent.isEmpty())
+        const auto optionalFileContent = CaraTest::File::readContent(GetSettingsFilePath());
+        if (!optionalFileContent.has_value())
             return {};
 
+        const auto fileContent = QString::fromStdString(optionalFileContent.value());
         const auto jsonDocument = QJsonDocument::fromJson(fileContent.toUtf8());
         if (!jsonDocument.isObject())
             return {};
@@ -80,7 +84,7 @@ namespace
 
         const auto settingsFilePath = GetSettingsFilePath();
         const auto jsonContent = jsonDocument.toJson(QJsonDocument::Indented);
-        CaraTest::File::WriteContent(settingsFilePath, jsonContent);
+        CaraTest::File::writeContent(settingsFilePath, jsonContent.toStdString());
     }
 }
 
@@ -128,7 +132,7 @@ SnapshotToolWindow::SnapshotToolWindow(QWidget* parent)
     m_originFileDiffHighlighter = new DiffHighlighter(CaraTest::DiffChange::Deletion, RejectColor, m_originFileContent->document());
     m_rejectSnapshotButton = new QPushButton("Reject", this);
     m_rejectSnapshotButton->setEnabled(false);
-    auto rejectStyleSheet = CaraTest::File::ReadContent(":/styles/rejectbutton.qss");
+    auto rejectStyleSheet = ReadStyleContent(":/styles/rejectbutton.qss");
     m_rejectSnapshotButton->setStyleSheet(rejectStyleSheet);
 
     auto originWidget = new QWidget(this);
@@ -149,7 +153,7 @@ SnapshotToolWindow::SnapshotToolWindow(QWidget* parent)
     m_snapshotFileDiffHighlighter = new DiffHighlighter(CaraTest::DiffChange::Addition, AcceptColor, m_snapshotFileContent->document());
     m_acceptSnapshotButton = new QPushButton("Accept", this);
     m_acceptSnapshotButton->setEnabled(false);
-    auto acceptStyleSheet = CaraTest::File::ReadContent(":/styles/acceptbutton.qss");
+    auto acceptStyleSheet = ReadStyleContent(":/styles/acceptbutton.qss");
     m_acceptSnapshotButton->setStyleSheet(acceptStyleSheet);
 
     auto snapshotWidget = new QWidget(this);
@@ -244,7 +248,7 @@ void SnapshotToolWindow::updateHighlighters()
 {
     const auto originFileContent = m_originFileContent->toPlainText();
     const auto snapshotFileContent = m_snapshotFileContent->toPlainText();
-    const auto diffs = CaraTest::Diff(originFileContent, snapshotFileContent);
+    const auto diffs = CaraTest::diff(originFileContent.toStdString(), snapshotFileContent.toStdString());
 
     m_originFileDiffHighlighter->highlightDiffs(diffs);
     m_snapshotFileDiffHighlighter->highlightDiffs(diffs);
@@ -260,28 +264,36 @@ void SnapshotToolWindow::onSnapshotClicked()
 
     const auto& index = selectedIndexes.first();
     const auto snapshotFileInfo = m_fileSystemModel->fileInfo(index);
+    const auto snapshotFilePath = std::filesystem::path(snapshotFileInfo.absoluteFilePath().toStdString());
     const auto isFile = snapshotFileInfo.isFile();
     if (!isFile)
         return;
 
-    const auto originFileInfo = GetOriginFileInfoForSnapshot(snapshotFileInfo);
-    const auto originExists = originFileInfo.exists();
+    const auto originFileInfo = GetOriginFileInfoForSnapshot(snapshotFilePath);
+    const auto originExists = std::filesystem::exists(originFileInfo);
     if (originExists)
     {
-        const auto originFileName = originFileInfo.fileName();
+        const auto originFileName = QString::fromStdString(originFileInfo.filename().string());
         m_originFileName->setText(originFileName);
-        const auto originFileContent = CaraTest::File::ReadContent(originFileInfo);
+        const auto originFileContent = QString::fromStdString(CaraTest::File::readContent(originFileInfo).value_or(""));
         m_originFileContent->setText(originFileContent);
-        const auto originFilePath = originFileInfo.absoluteFilePath();
+        const auto originFilePath = QString::fromStdString(originFileInfo.string());
         m_selectedSnapshotWatcher->addPath(originFilePath);
     }
 
     const auto snapshotFileName = snapshotFileInfo.fileName();
     m_snapshotFileName->setText(snapshotFileName);
-    const auto snapshotFileContent = CaraTest::File::ReadContent(snapshotFileInfo);
-    m_snapshotFileContent->setText(snapshotFileContent);
-    const auto snapshotFilePath = snapshotFileInfo.absoluteFilePath();
-    m_selectedSnapshotWatcher->addPath(snapshotFilePath);
+    const auto optionalSnapshotFileContent = CaraTest::File::readContent(snapshotFilePath);
+    if(optionalSnapshotFileContent.has_value())
+    {
+        const auto snapshotFileContent = QString::fromStdString(optionalSnapshotFileContent.value());
+        m_snapshotFileContent->setText(snapshotFileContent);
+    }
+    else
+    {
+        m_snapshotFileContent->setText("");
+    }
+    m_selectedSnapshotWatcher->addPath(snapshotFileInfo.absoluteFilePath());
 
     updateHighlighters();
 }
@@ -316,30 +328,39 @@ void SnapshotToolWindow::onAcceptClicked()
 {
     const auto selectedIndexes = m_snapshotFileTree->selectionModel()->selectedIndexes();
     const auto snapshotFileInfo = m_fileSystemModel->fileInfo(selectedIndexes.first());
-    const auto snapshotFileName = snapshotFileInfo.fileName();
-    auto snapshotFile = QFile(snapshotFileInfo.absoluteFilePath());
-    if (!snapshotFile.exists())
+    const auto snapshotFilePath = std::filesystem::path(snapshotFileInfo.absoluteFilePath().toStdString());
+    const auto snapshotFileName = snapshotFilePath.filename();
+    if (!std::filesystem::exists(snapshotFilePath))
         return;
 
     clearSelectedSnapshotWatcher();
 
-    const auto originFileInfo = GetOriginFileInfoForSnapshot(snapshotFileInfo);
-    const auto originFileName = originFileInfo.fileName();
-    const auto originFilePath = originFileInfo.absoluteFilePath();
-    auto originFile = QFile(originFileInfo.absoluteFilePath());
-    if (originFile.exists())
+    const auto originFileInfo = GetOriginFileInfoForSnapshot(snapshotFilePath);
+    const auto originFileName = originFileInfo.filename();
+    const auto originFilePath = originFileInfo;
+
+    if (std::filesystem::exists(originFilePath))
     {
-        const auto wasRemoved = originFile.remove();
-        if (!wasRemoved)
+        try
         {
-            ShowWarningDialog(QString("Failed to delete the file: '%1'").arg(originFileName));
+            std::filesystem::remove(originFilePath);
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            ShowWarningDialog(QString("Failed to delete the file: '%1'").arg(QString::fromStdString(originFileName.string())));
             return;
         }
     }
 
-    const auto wasRenamed = snapshotFile.rename(originFilePath);
-    if(!wasRenamed)
-        ShowWarningDialog(QString("Failed to rename the file: '%1' to '%2'").arg(snapshotFileName, originFileName));
+    try
+    {
+        std::filesystem::rename(snapshotFilePath, originFilePath);
+    }
+    catch (const std::filesystem::filesystem_error& e)
+    {
+        ShowWarningDialog(QString("Failed to rename the file: '%1' to '%2'")
+                          .arg(QString::fromStdString(snapshotFileName.string()), QString::fromStdString(originFileName.string())));
+    }
 }
 
 void SnapshotToolWindow::onCurrentDisplayedFileChanged(const QString& filePath)
@@ -351,20 +372,35 @@ void SnapshotToolWindow::onCurrentDisplayedFileChanged(const QString& filePath)
     if (!watchedFiles.contains(filePath))
         m_selectedSnapshotWatcher->addPath(filePath);
 
-    const auto changedFile = QFileInfo(filePath);
-    const auto fileExtension = changedFile.suffix();
-    const auto snapshotExtension = SnapshotFileExtensionMask.mid(2); // remove the leading "*."
-    const auto isSnapshot = fileExtension.compare(snapshotExtension, Qt::CaseSensitivity::CaseInsensitive) == 0;
-    
+    const auto changedFilePath = std::filesystem::path(filePath.toStdString());
+    const auto fileExtension = changedFilePath.extension().string();
+    const auto snapshotExtension = SnapshotFileExtensionMask.mid(1).toStdString(); // remove the leading "*"
+    const auto isSnapshot = (fileExtension == snapshotExtension);
     if (isSnapshot)
     {
-        const auto snapshotFileContent = CaraTest::File::ReadContent(changedFile);
-        m_snapshotFileContent->setText(snapshotFileContent);
+        const auto optionalSnapshotFileContent = CaraTest::File::readContent(changedFilePath);
+        if (optionalSnapshotFileContent.has_value())
+        {
+            const auto snapshotFileContent = QString::fromStdString(optionalSnapshotFileContent.value());
+            m_snapshotFileContent->setText(snapshotFileContent);
+        }
+        else
+        {
+            m_snapshotFileContent->setText("");
+        }
     }
     else
     {
-        const auto originFileContent = CaraTest::File::ReadContent(changedFile);
-        m_originFileContent->setText(originFileContent);
+        const auto optionalOriginFileContent = CaraTest::File::readContent(changedFilePath);
+        if (optionalOriginFileContent.has_value())
+        {
+            const auto originFileContent = QString::fromStdString(optionalOriginFileContent.value());
+            m_originFileContent->setText(originFileContent);
+        }
+        else
+        {
+            m_originFileContent->setText("");
+        }
     }
 
     updateHighlighters();

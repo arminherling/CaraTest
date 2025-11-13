@@ -1,23 +1,30 @@
-#pragma once
+﻿#pragma once
 
 #include <CaraTest/API.h>
-#include <CaraTest/TestResult.h>
-#include <CaraTest/SimpleTest.h>
-#include <CaraTest/ParameterizedTest.h>
+#include <CaraTest/Tests.h>
 #include <functional>
-#include <memory>
-#include <QString>
-#include <vector>
+#include <chrono>
+#include <numeric>
 
 namespace CaraTest
 {
+    struct TestSuiteResult
+    {
+        int passedTestCount;
+        int skippedTestCount;
+        int failedTestCount;
+        int totalTestCount;
+        std::chrono::nanoseconds duration;
+    };
+
     class CARATEST_API TestSuite
     {
     public:
-        TestSuite(const QString& name = __builtin_FUNCTION());
+        TestSuite(const std::string& name);
+        TestSuite(const std::source_location& location = std::source_location::current());
 
         template<typename TFunction>
-        void add(const QString& testName, TFunction&& testFunction)
+        TestPtr add(const std::string& testName, TFunction&& testFunction)
         {
             auto test = std::make_shared<
                 SimpleTest<
@@ -26,10 +33,11 @@ namespace CaraTest
                     testName);
 
             m_tests.push_back(test);
+            return test;
         }
 
         template<typename TFunction, typename TData>
-        void add(const QString& testName, TFunction&& function, TData&& data)
+        TestPtr add(const std::string& testName, TFunction&& function, TData&& data)
         {
             auto test = std::make_shared<
                 ParameterizedTest<
@@ -40,55 +48,39 @@ namespace CaraTest
                     testName);
 
             m_tests.push_back(test);
+            return test;
         }
 
-        const QString& name() const { return m_name; }
-        const QList<std::shared_ptr<TestBase>>& tests() const { return m_tests; }
+        const std::string& name() const { return m_name; }
+        const std::vector<TestPtr>& tests() const { return m_tests; }
 
         int passedTests() const
         {
-            auto passed = 0;
-            for (const auto& test : m_tests)
-            {
-                for (const auto& data : test->result().data)
-                {
-                    if (data == TestResultKind::Passed)
-                        passed++;
-                }
-            }
-            return passed;
+            return std::accumulate(m_tests.begin(), m_tests.end(), 0, [](int sum, const auto& test) {
+                return sum + static_cast<int>(std::ranges::count(test->result().data, TestResultKind::Passed));
+            });
         }
 
         int failedTests() const
         {
-            auto failed = 0;
-            for (const auto& test : m_tests)
-            {
-                for (const auto& data : test->result().data)
-                {
-                    if (data == TestResultKind::Failed)
-                        failed++;
-                }
-            }
-            return failed;
+            return std::accumulate(m_tests.begin(), m_tests.end(), 0, [](int sum, const auto& test) {
+                return sum + static_cast<int>(std::ranges::count(test->result().data, TestResultKind::Failed));
+            });
         }
 
         int skippedTests() const
         {
-            auto skipped = 0;
-            for (const auto& test : m_tests)
-            {
-                for (const auto& data : test->result().data)
-                {
-                    if (data == TestResultKind::Skipped)
-                        skipped++;
-                }
-            }
-            return skipped;
+            return std::accumulate(m_tests.begin(), m_tests.end(), 0, [](int sum, const auto& test) {
+                return sum + static_cast<int>(std::ranges::count(test->result().data, TestResultKind::Skipped));
+            });
         }
 
     private:
-        QString m_name;
-        QList<std::shared_ptr<TestBase>> m_tests;
+        std::string m_name;
+        std::vector<TestPtr> m_tests;
     };
+
+    using TestSuitePtr = std::shared_ptr<TestSuite>;
+
+    std::string toSuiteName(const std::source_location& location);
 }

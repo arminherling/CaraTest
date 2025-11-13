@@ -1,11 +1,12 @@
-﻿#include "TestRunnerConsoleOutput.h"
+﻿#include <CaraTest/TestRunnerConsoleOutput.h>
 #include <CaraTest/Stringify.h>
 #include <CaraTest/Diff.h>
-
-#include <QRegularExpression>
-
+#include <CaraTest/TestSuite.h>
+#include <CaraTest/HelperExceptions.h>
 #include <algorithm>
 #include <iostream>
+#include <source_location>
+#include <numeric>
 
 namespace
 {
@@ -13,44 +14,49 @@ namespace
 
     const auto defaultConsoleWidth = 80;
 
-    const auto resetAttributes = QString("\033[0m");
-    const auto greenColorSequence = QString("\033[38;2;138;226;138m");
-    const auto yellowColorSequence = QString("\033[38;2;255;228;160m");
-    const auto orangeColorSequence = QString("\033[38;2;255;166;77m");
-    const auto redColorSequence = QString("\033[38;2;244;75;86m");
-    const auto blueColorSequence = QString("\033[38;2;42;129;211m");
+    const auto resetAttributes = std::string("\033[0m");
+    const auto greenColorSequence = std::string("\033[38;2;138;226;138m");
+    const auto yellowColorSequence = std::string("\033[38;2;255;228;160m");
+    const auto orangeColorSequence = std::string("\033[38;2;255;166;77m");
+    const auto redColorSequence = std::string("\033[38;2;244;75;86m");
+    const auto blueColorSequence = std::string("\033[38;2;42;129;211m");
 
-    const auto moveCursorToPositionSequence = QString("\033[%1;%2H");
+    const auto moveCursorToPositionSequence = std::string("\033[%1;%2H");
 
-    const auto coloredPass = QString("%1PASS%2").arg(greenColorSequence, resetAttributes);
-    const auto coloredSkip = QString("%1SKIP%2").arg(yellowColorSequence, resetAttributes);
-    const auto coloredFail = QString("%1FAIL%2").arg(redColorSequence, resetAttributes);
+    const auto coloredPass = std::format("{}PASS{}", greenColorSequence, resetAttributes);
+    const auto coloredSkip = std::format("{}SKIP{}", yellowColorSequence, resetAttributes);
+    const auto coloredFail = std::format("{}FAIL{}", redColorSequence, resetAttributes);
 
-    const auto underlinedSequence = QString("\033[4m");
-    const auto diffLineBreak = QString("%1\n%2%3").arg(resetAttributes, underlinedSequence, redColorSequence);
-    const auto lineBreakRegex = QRegularExpression("[\r\n]");
+    const auto underlinedSequence = "\033[4m";
+    const auto diffLineBreak = std::format("{}\n{}{}", resetAttributes, underlinedSequence, redColorSequence);
 
-    std::string TestNumber(int currentNumber, int totalCount, bool printNumber)
+    static std::string TestNumber(int currentNumber, int totalCount, bool printNumber)
     {
-        const auto totalCountString = QString::number(totalCount);
+        const auto totalCountString = std::to_string(totalCount);
         const auto countCharCount = totalCountString.length();
-        const auto numberString = QString::number(currentNumber);
+        const auto numberString = std::to_string(currentNumber);
 
         if (printNumber)
-            return numberString.rightJustified(countCharCount, ' ').toStdString();
+        {
+            // Right-justify the number string
+            return std::string(countCharCount > numberString.length() ? countCharCount - numberString.length() : 0, ' ') + numberString;
+        }
         else
-            return QString().rightJustified(countCharCount, ' ').toStdString();
+        {
+            // Return a string of spaces with the same length as countCharCount
+            return std::string(countCharCount, ' ');
+        }
     }
 
-    std::string ResultNumber(int currentNumber, int totalCount)
+    static std::string ResultNumber(int currentNumber, int totalCount)
     {
-        const auto totalCountString = QString::number(totalCount);
-        const auto numberString = QString::number(currentNumber);
+        const auto totalCountString = std::to_string(totalCount);
+        const auto numberString = std::to_string(currentNumber);
 
-        return QString("%1/%2").arg(numberString, totalCountString).toStdString();
+        return std::format("{}/{}", numberString, totalCountString);
     }
 
-    QString StringifyTestResult(TestResultKind result)
+    static std::string StringifyTestResult(TestResultKind result)
     {
         switch (result)
         {
@@ -62,13 +68,13 @@ namespace
                 return coloredPass;
             case TestResultKind::Invalid:
             default:
-                return QString("....");
+                return std::string("....");
         }
     }
 
-    QString ColorDifferences(const QString& input, const QList<DiffLocation>& differences, const QString& colorSequence, DiffChange change)
+    static std::string ColorDifferences(const std::string& input, const std::vector<DiffLocation>& differences, const std::string& colorSequence, DiffChange change)
     {
-        QStringList parts{};
+        std::vector<std::string> parts{};
         int lastIndex = input.size();
 
         std::for_each(differences.rbegin(), differences.rend(),
@@ -77,65 +83,65 @@ namespace
                     return;
 
                 const auto endIndex = diff.endIndex + 1;
-                parts.prepend(input.mid(endIndex, lastIndex - endIndex));
+                parts.push_back(input.substr(endIndex, lastIndex - endIndex));
 
-                auto diffString = input.mid(diff.startIndex, endIndex - diff.startIndex);
-                
-                if (diffString == '\r')
+                auto diffString = input.substr(diff.startIndex, endIndex - diff.startIndex);
+
+                if (diffString == "\r")
                 {
                     lastIndex = diff.startIndex;
                     return;
                 }
-                else if (diffString == '\n')
+                else if (diffString == "\n")
                 {
                     diffString = diffLineBreak;
                 }
 
-                parts.prepend(resetAttributes);
-                parts.prepend(diffString);
-                parts.prepend(colorSequence);
-                parts.prepend(underlinedSequence);
+                parts.push_back(resetAttributes);
+                parts.push_back(diffString);
+                parts.push_back(colorSequence);
+                parts.push_back(underlinedSequence);
 
                 lastIndex = diff.startIndex;
             });
 
         if (lastIndex != 0)
-            parts.prepend(input.mid(0, lastIndex));
+            parts.insert(parts.begin(), input.substr(0, lastIndex));
 
-        return parts.join(QString());
+        return std::accumulate(parts.begin(), parts.end(), std::string());
     }
 
-    QList<DiffLocation> DiffAll(const QString& first, const QString& second)
+    static std::vector<DiffLocation> DiffAll(const std::string& first, const std::string& second)
     {
-        QList<DiffLocation> differences;
+        std::vector<DiffLocation> differences;
 
-        if (first.isNull() || second.isNull())
+        if (first.empty() || second.empty())
             return differences;
 
-        if (first == second && first.isEmpty())
+        if (first == second && first.empty())
             return differences;
 
         const int firstLength = first.size();
         const int secondLength = second.size();
 
-        differences.append(DiffLocation{ .startIndex = 0, .endIndex = firstLength, .change = DiffChange::Addition });
-        differences.append(DiffLocation{ .startIndex = 0, .endIndex = secondLength, .change = DiffChange::Deletion });
+        differences.push_back(DiffLocation{ .startIndex = 0, .endIndex = firstLength, .change = DiffChange::Addition });
+        differences.push_back(DiffLocation{ .startIndex = 0, .endIndex = secondLength, .change = DiffChange::Deletion });
 
         return differences;
     }
 
-    void PrintDiff(
-        const QString& expectedValue,
-        const QString& actualValue,
+    static void PrintDiff(
+        const std::string& expectedValue,
+        const std::string& actualValue,
         const std::source_location& location,
         ValueMismatchTestException::OutputMode outputMode)
     {
         std::cout << " " << location.file_name() << " Line:" << location.line() << '\n';
 
-        QList<DiffLocation> differences;
+        std::vector<DiffLocation> differences;
         if (outputMode == ValueMismatchTestException::OutputMode::Diff)
         {
-            differences = Diff(expectedValue, actualValue);
+            differences = diff(expectedValue, actualValue);
         }
         else
         {
@@ -151,12 +157,12 @@ namespace
         std::cout << "   Expected: ";
         if (insertLinebreak)
             std::cout << '\n';
-        std::cout << expectedColoredOutput.toStdString() << '\n';
+        std::cout << expectedColoredOutput << '\n';
 
         std::cout << "   But got:  ";
         if (insertLinebreak)
             std::cout << '\n';
-        std::cout << actualColoredOutput.toStdString() << '\n';
+        std::cout << actualColoredOutput << '\n';
     }
 }
 
@@ -172,7 +178,7 @@ namespace
 
     void* g_windowConsoleHandle = nullptr;
 
-    int SetupConsole()
+    static int SetupConsole()
     {
         g_windowConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -187,16 +193,16 @@ namespace
         return consoleWidth - 12;
     }
 
-    QPoint CurrentCursorPosition()
+    static Position CurrentCursorPosition()
     {
         CONSOLE_SCREEN_BUFFER_INFO screenBuffer;
         GetConsoleScreenBufferInfo(g_windowConsoleHandle, &screenBuffer);
-        return QPoint(screenBuffer.dwCursorPosition.X, screenBuffer.dwCursorPosition.Y);
+        return Position(screenBuffer.dwCursorPosition.X, screenBuffer.dwCursorPosition.Y);
     }
 
-    void MoveCursorToPosition(const QPoint& position)
+    static void MoveCursorToPosition(const Position& position)
     {
-        COORD coord{ static_cast<SHORT>(position.x()), static_cast<SHORT>(position.y()) };
+        COORD coord{ static_cast<SHORT>(position.x), static_cast<SHORT>(position.y) };
         SetConsoleCursorPosition(g_windowConsoleHandle, coord);
     }
 }
@@ -205,17 +211,17 @@ namespace
 
 namespace
 {
-    int SetupConsole()
+    static int SetupConsole()
     {
         return defaultConsoleWidth;
     }
 
-    QPoint CurrentCursorPosition()
+    static Position CurrentCursorPosition()
     {
-        return QPoint();
+        return Position{};
     }
 
-    void MoveCursorToPosition(const QPoint& position)
+    static void MoveCursorToPosition(const Position& position)
     {
     }
 }
@@ -230,24 +236,26 @@ namespace CaraTest
         m_headerSize = SetupConsole();
     }
 
-    void TestRunnerConsoleOutput::writeSuiteName(const QString& name)
+    void TestRunnerConsoleOutput::writeSuiteName(const std::string& name)
     {
-        if (name.isEmpty())
+        if (name.empty())
             return;
 
-        std::cout << "         --== " << name.toStdString() << " ==--\n";
+        std::cout << "         --== " << name << " ==--\n";
     }
 
-    QPoint TestRunnerConsoleOutput::writeTestHeader(int currentTest, int totalTests, const QString& testName, bool hasSubTests)
+    Position TestRunnerConsoleOutput::writeTestHeader(int currentTest, int totalTests, const std::string& testName, bool hasSubTests)
     {
         std::cout << " " << TestNumber(currentTest, totalTests, !hasSubTests);
         if (hasSubTests)
         {
-            std::cout << testName.toStdString() << '\n';
+            std::cout << testName << '\n';
             return {};
         }
+        const auto totalCountString = std::to_string(totalTests);
+        const auto extraSpaces = totalCountString.length() - 1;
 
-        std::cout << " " << testName.leftJustified(m_headerSize, '.').toStdString() << " " << std::flush;
+        std::cout << " " << testName << std::string(m_headerSize - (testName.size() + extraSpaces), '.') << " " << std::flush;
 
         const auto cursorPosition = CurrentCursorPosition();
 
@@ -256,9 +264,9 @@ namespace CaraTest
         return cursorPosition;
     }
 
-    QPoint TestRunnerConsoleOutput::writeSubTestHeader(int indentation, int currentTest, int totalTests, const QString& parameters)
+    Position TestRunnerConsoleOutput::writeSubTestHeader(int indentation, int currentTest, int totalTests, const std::string& parameters)
     {
-        const auto indent = QString(" ").repeated(indentation + 2);
+        const auto indent = std::string(indentation + 2, ' ');
 
         const auto testNumber = TestNumber(currentTest, totalTests, true);
         const auto testNumberSize = testNumber.size();
@@ -266,9 +274,9 @@ namespace CaraTest
         const auto spaceAndDashSize = 3;
         const auto testAndSubTestSizeDifference = testNumberSize - indent.size();
         const auto headerSize = m_headerSize - indent.size() - testAndSubTestSizeDifference - spaceAndDashSize;
-        const auto truncatedParameters = parameters.left(headerSize - 3);
+        const auto truncatedParameters = parameters.substr(0, headerSize - 3);
 
-        std::cout << indent.toStdString() << testNumber << " - " << truncatedParameters.leftJustified(headerSize, '.').toStdString() << " " << std::flush;
+        std::cout << indent << testNumber << " - " << std::string(headerSize - truncatedParameters.size(), '.') << truncatedParameters << " " << std::flush;
 
         const auto cursorPosition = CurrentCursorPosition();
 
@@ -277,18 +285,18 @@ namespace CaraTest
         return cursorPosition;
     }
 
-    void TestRunnerConsoleOutput::updateTestResult(const QPoint& position, TestResultKind result)
+    void TestRunnerConsoleOutput::updateTestResult(const Position& position, TestResultKind result)
     {
         std::cout << std::flush;
 
-        if (position.isNull())
+        if (position.x == 0 && position.y == 0)
             return;
 
         const auto oldPosition = CurrentCursorPosition();
 
         MoveCursorToPosition(position);
 
-        std::cout << StringifyTestResult(result).toStdString() << std::flush;
+        std::cout << StringifyTestResult(result) << std::flush;
 
         MoveCursorToPosition(oldPosition);
     }
@@ -314,23 +322,23 @@ namespace CaraTest
     {
         PrintDiff(e.expectedValue, e.actualValue, e.location, ValueMismatchTestException::OutputMode::Diff);
 
-        std::cout << '\n' << orangeColorSequence.toStdString() << "   Snapshot created: " << resetAttributes.toStdString() << e.filePath.toStdString() << '\n';
+        std::cout << '\n' << orangeColorSequence << "   Snapshot created: " << resetAttributes << e.filePath << '\n';
     }
 
     void TestRunnerConsoleOutput::writeTestRunnerResult(const TestSuiteResult& result)
     {
         std::cout
-            << " " << coloredPass.toStdString()
+            << " " << coloredPass
             << " " << ResultNumber(result.passedTestCount, result.totalTestCount)
-            << " " << coloredSkip.toStdString()
+            << " " << coloredSkip
             << " " << ResultNumber(result.skippedTestCount, result.totalTestCount)
-            << " " << coloredFail.toStdString()
+            << " " << coloredFail
             << " " << ResultNumber(result.failedTestCount, result.totalTestCount)
-            << " TIME " << Stringify(result.duration).toStdString()
+            << " TIME " << stringify(result.duration)
             << '\n';
     }
 
-    void TestRunnerConsoleOutput::writeTestRunnerTotalResult(const QList<TestSuiteResult>& results)
+    void TestRunnerConsoleOutput::writeTestRunnerTotalResult(const std::vector<TestSuiteResult>& results)
     {
         TestSuiteResult totalResult{};
         for (const auto& result : results)

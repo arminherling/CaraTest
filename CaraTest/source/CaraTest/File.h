@@ -2,15 +2,15 @@
 
 #include <CaraTest/API.h>
 
-#include <QtCore/QString>
-#include <QtCore/QFileInfo>
+#include <filesystem>
+#include <string>
+#include <optional>
 
 namespace CaraTest
 {
     namespace File
     {
-        CARATEST_API QString ReadContent(const QString& filePath);
-        CARATEST_API QString ReadContent(const QFileInfo& fileInfo);
-        CARATEST_API bool WriteContent(const QString& filePath, const QString& content);
+        CARATEST_API std::optional<std::string> readContent(const std::filesystem::path& filePath);
+        CARATEST_API bool writeContent(const std::filesystem::path& filePath, const std::string& content);
     }
 }
