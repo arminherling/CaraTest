@@ -807,3 +807,77 @@ auto snapshot = CaraTest::getSuite("SnapshotTests");
 auto snapshotTest1 = snapshot->add("EqualsFileCreatesSnapshotWhenFileDoesNotExist", EqualsFileCreatesSnapshotWhenFileDoesNotExist);
 auto snapshotTest2 = snapshot->add("EqualsFileDoesntCreateSnapshotWhenValuesareEqual", EqualsFileDoesntCreateSnapshotWhenValuesareEqual);
 auto snapshotTest3 = snapshot->add("EqualsFileCreateSnapshotWhenValuesAreNotEqual", EqualsFileCreateSnapshotWhenValuesAreNotEqual);
+
+
+// CaraTest::getSuite
+auto globalSuite1 = CaraTest::getSuite();
+auto globalSuite2 = CaraTest::getSuite("__GlobalSuiteName");
+
+auto helper = CaraTest::getSuite("HelperTests");
+auto helper1 = helper->add("GlobalGetSuiteWithoutNameReturnsFileName", []()
+    {
+        CaraTest::areEqual("CaraTestTests", globalSuite1->name());
+    });
+auto helper2 = helper->add("GlobalGetSuiteWithNameReturnsGivenName", []()
+    {
+        CaraTest::areEqual("__GlobalSuiteName", globalSuite2->name());
+    });
+
+static void LocalGetSuiteWithoutNameReturnsFunctionName()
+{
+    auto localSuite = CaraTest::getSuite();
+    CaraTest::areEqual("LocalGetSuiteWithoutNameReturnsFunctionName", localSuite->name());
+}
+auto helper3 = helper->add("LocalGetSuiteWithoutNameReturnsFunctionName", LocalGetSuiteWithoutNameReturnsFunctionName);
+auto helper4 = helper->add("LocalGetSuiteWithNameReturnsGivenName", []()
+    {
+        auto localSuite = CaraTest::getSuite("LocalSuiteName");
+        CaraTest::areEqual("LocalSuiteName", localSuite->name());
+    });
+
+
+// CaraTest::addTest
+// Version 1: addTest("testName", testFunction)
+auto globalTest1 = CaraTest::addTest("__GlobalNamedTest_const_char*", []() {CaraTest::skip(); });
+auto helper5 = helper->add("GlobalAddTestWithName_const_char*", []()
+    {
+        CaraTest::areEqual("__GlobalNamedTest", globalTest1->name());
+    });
+
+auto globalTest2 = CaraTest::addTest(std::string("__GlobalNamedTest_std::string"), []() {CaraTest::skip(); });
+auto helper6 = helper->add("GlobalAddTestWithName_std::string", []()
+    {
+        CaraTest::areEqual("__GlobalNamedTest", globalTest2->name());
+    });
+
+// Version 2: addTest(testFunction) - uses file and line as test name
+auto globalTest3 = CaraTest::addTest([]() {CaraTest::skip(); });
+auto helper7 = helper->add("GlobalAddTestWithoutName", []()
+    {
+        CaraTest::areEqual("CaraTestTests.cpp - Line: 854", globalTest3->name());
+    });
+
+// Version 3: addTest(testName, testFunction, data)
+static std::vector<std::tuple<bool>> Dummy_Data()
+{
+    return { std::make_tuple(true), std::make_tuple(false) };
+}
+
+auto globalTest4 = CaraTest::addTest("__GlobalNamedParameterTest", [](bool) {CaraTest::skip(); }, Dummy_Data);
+auto helper8 = helper->add("GlobalAddTestWithNameAndData_const_char*", []()
+    {
+        CaraTest::areEqual("__GlobalNamedParameterTest", globalTest4->name());
+    });
+
+auto globalTest5 = CaraTest::addTest(std::string("__GlobalNamedParameterTest"), [](bool) {CaraTest::skip(); }, Dummy_Data);
+auto helper9 = helper->add("GlobalAddTestWithNameAndData_std::string", []()
+    {
+        CaraTest::areEqual("__GlobalNamedParameterTest", globalTest5->name());
+    });
+
+// Version 4: addTest(testFunction, data)
+auto globalTest6 = CaraTest::addTest([](bool) {CaraTest::skip(); }, Dummy_Data);
+auto helper10 = helper->add("GlobalAddTestWithNameAndData_const_char*", []()
+    {
+        CaraTest::areEqual("CaraTestTests.cpp - Line: 879", globalTest6->name());
+    });

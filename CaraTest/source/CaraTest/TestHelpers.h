@@ -34,12 +34,19 @@ namespace CaraTest
 
     // Helper overloads for simple tests
     template<typename TFunction>
-    [[nodiscard]] TestPtr addTest(const std::string& name, TFunction&& testFunction)
+    [[nodiscard]] TestPtr addTest(const char* name, TFunction&& testFunction, const std::source_location& location = std::source_location::current())
     {
-        auto suite = getSuite("Global");
+        auto suite = getSuite(location);
         return suite->add(name, std::forward<TFunction>(testFunction));
     }
 
+    template<typename TFunction>
+    [[nodiscard]] TestPtr addTest(std::string&& name, TFunction&& testFunction, const std::source_location& location = std::source_location::current())
+    {
+        auto suite = getSuite(location);
+        return suite->add(name, std::forward<TFunction>(testFunction));
+    }
+    
     template<typename TFunction>
     [[nodiscard]] TestPtr addTest(TFunction&& testFunction, const std::source_location& location = std::source_location::current())
     {
@@ -50,9 +57,16 @@ namespace CaraTest
 
     // Helper overloads for parameterized tests
     template<typename TFunction, typename TData>
-    [[nodiscard]] TestPtr addTest(const std::string& name, TFunction&& function, TData&& data)
+    [[nodiscard]] TestPtr addTest(const char* name, TFunction&& function, TData&& data, const std::source_location& location = std::source_location::current())
     {
-        auto suite = getSuite("Global");
+        auto suite = getSuite(location);
+        return suite->add(name, std::forward<TFunction>(function), std::forward<TData>(data));
+    }
+
+    template<typename TFunction, typename TData>
+    [[nodiscard]] TestPtr addTest(std::string&& name, TFunction&& function, TData&& data, const std::source_location& location = std::source_location::current())
+    {
+        auto suite = getSuite(location);
         return suite->add(name, std::forward<TFunction>(function), std::forward<TData>(data));
     }
 
