@@ -841,13 +841,13 @@ auto helper4 = helper->add("LocalGetSuiteWithNameReturnsGivenName", []()
 auto globalTest1 = CaraTest::addTest("__GlobalNamedTest_const_char*", []() {CaraTest::skip(); });
 auto helper5 = helper->add("GlobalAddTestWithName_const_char*", []()
     {
-        CaraTest::areEqual("__GlobalNamedTest", globalTest1->name());
+        CaraTest::areEqual("__GlobalNamedTest_const_char*", globalTest1->name());
     });
 
 auto globalTest2 = CaraTest::addTest(std::string("__GlobalNamedTest_std::string"), []() {CaraTest::skip(); });
 auto helper6 = helper->add("GlobalAddTestWithName_std::string", []()
     {
-        CaraTest::areEqual("__GlobalNamedTest", globalTest2->name());
+        CaraTest::areEqual("__GlobalNamedTest_std::string", globalTest2->name());
     });
 
 // Version 2: addTest(testFunction) - uses file and line as test name
