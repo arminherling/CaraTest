@@ -57,21 +57,24 @@ namespace CaraTest
         int passedTests() const
         {
             return std::accumulate(m_tests.begin(), m_tests.end(), 0, [](int sum, const auto& test) {
-                return sum + static_cast<int>(std::ranges::count(test->result().data, TestResultKind::Passed));
+                const auto& result = test->result();
+                return sum + static_cast<int>(std::count(result.data.begin(), result.data.end(), TestResultKind::Passed));
             });
         }
 
         int failedTests() const
         {
             return std::accumulate(m_tests.begin(), m_tests.end(), 0, [](int sum, const auto& test) {
-                return sum + static_cast<int>(std::ranges::count(test->result().data, TestResultKind::Failed));
+                const auto& result = test->result();
+                return sum + static_cast<int>(std::count(result.data.begin(), result.data.end(), TestResultKind::Failed));
             });
         }
 
         int skippedTests() const
         {
             return std::accumulate(m_tests.begin(), m_tests.end(), 0, [](int sum, const auto& test) {
-                return sum + static_cast<int>(std::ranges::count(test->result().data, TestResultKind::Skipped));
+                const auto& result = test->result();
+                return sum + static_cast<int>(std::count(result.data.begin(), result.data.end(), TestResultKind::Skipped));
             });
         }
 

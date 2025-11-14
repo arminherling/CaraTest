@@ -19,18 +19,18 @@ namespace CaraTest
     /// Creates or retrieves a test suite with the given name.
     /// If a suite with the specified name does not exist, a new one is created and registered.
     /// </summary>
-    CARATEST_API [[nodiscard]] TestSuitePtr getSuite(const std::string& name);
+    [[nodiscard]] CARATEST_API TestSuitePtr getSuite(const std::string& name);
     
     /// <summary>
     /// Creates or retrieves a test suite based on the calling source location.
     /// If a suite with the specified name does not exist, a new one is created and registered.
     /// </summary>
-    CARATEST_API [[nodiscard]] TestSuitePtr getSuite(const std::source_location& location = std::source_location::current());
+    [[nodiscard]] CARATEST_API TestSuitePtr getSuite(const std::source_location& location = std::source_location::current());
 
     /// <summary>
     /// Runs all registered test suites and their tests.
     /// </summary>
-    CARATEST_API [[nodiscard]] int runAll(int argc, char* argv[]);
+    [[nodiscard]] CARATEST_API int runAll(int argc, char* argv[]);
 
     // Helper overloads for simple tests
     template<typename TFunction>
