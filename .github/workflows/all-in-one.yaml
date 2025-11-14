@@ -1,4 +1,4 @@
-name: AllInOne
+﻿name: AllInOne
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
     - name: Run Test (Windows)
       if: runner.os == 'Windows'
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: ./AllInOne.exe
+      run: ./Tests/AllInOne/AllInOne.exe
 
     - name: Run Test (Linux)
       if: runner.os == 'Linux'
