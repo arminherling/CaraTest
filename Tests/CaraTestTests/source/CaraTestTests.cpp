@@ -859,7 +859,7 @@ auto helper6 = helper->add("GlobalAddTestWithName_std::string", []()
 auto globalTest3 = CaraTest::addTest([]() {CaraTest::skip(); });
 auto helper7 = helper->add("GlobalAddTestWithoutName", []()
     {
-        CaraTest::areEqual("CaraTestTests.cpp - Line: 854", globalTest3->name());
+        CaraTest::areEqual("CaraTestTests.cpp - Line: 859", globalTest3->name());
     });
 
 // Version 3: addTest(testName, testFunction, data)
@@ -884,5 +884,5 @@ auto helper9 = helper->add("GlobalAddTestWithNameAndData_std::string", []()
 auto globalTest6 = CaraTest::addTest([](bool) {CaraTest::skip(); }, Dummy_Data);
 auto helper10 = helper->add("GlobalAddTestWithNameAndData_const_char*", []()
     {
-        CaraTest::areEqual("CaraTestTests.cpp - Line: 879", globalTest6->name());
+        CaraTest::areEqual("CaraTestTests.cpp - Line: 884", globalTest6->name());
     });
