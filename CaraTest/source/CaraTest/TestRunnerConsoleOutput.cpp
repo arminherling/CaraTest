@@ -75,21 +75,21 @@ namespace
     static std::string ColorDifferences(const std::string& input, const std::vector<DiffLocation>& differences, const std::string& colorSequence, DiffChange change)
     {
         std::vector<std::string> parts{};
-        int lastIndex = input.size();
+        std::size_t lastIndex = 0;
 
-        std::for_each(differences.rbegin(), differences.rend(),
-            [&](const DiffLocation& diff) {
+        std::for_each(differences.begin(), differences.end(),
+            [&](const DiffLocation& diff) 
+            {
                 if (diff.change != change)
                     return;
 
-                const auto endIndex = diff.endIndex + 1;
-                parts.push_back(input.substr(endIndex, lastIndex - endIndex));
+                const auto startIndex = diff.startIndex;
+                parts.push_back(input.substr(lastIndex, startIndex - lastIndex));
 
-                auto diffString = input.substr(diff.startIndex, endIndex - diff.startIndex);
-
+                auto diffString = input.substr(startIndex, diff.endIndex - startIndex + 1);
                 if (diffString == "\r")
                 {
-                    lastIndex = diff.startIndex;
+                    lastIndex = diff.endIndex + 1;
                     return;
                 }
                 else if (diffString == "\n")
@@ -97,16 +97,16 @@ namespace
                     diffString = diffLineBreak;
                 }
 
-                parts.push_back(resetAttributes);
-                parts.push_back(diffString);
                 parts.push_back(colorSequence);
                 parts.push_back(underlinedSequence);
+                parts.push_back(diffString);
+                parts.push_back(resetAttributes);
 
-                lastIndex = diff.startIndex;
+                lastIndex = diff.endIndex + 1;
             });
 
-        if (lastIndex != 0)
-            parts.insert(parts.begin(), input.substr(0, lastIndex));
+        if (lastIndex < input.size())
+            parts.push_back(input.substr(lastIndex, input.size() - lastIndex));
 
         return std::accumulate(parts.begin(), parts.end(), std::string());
     }
