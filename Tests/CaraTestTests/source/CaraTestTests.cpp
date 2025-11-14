@@ -826,7 +826,12 @@ auto helper2 = helper->add("GlobalGetSuiteWithNameReturnsGivenName", []()
 static void LocalGetSuiteWithoutNameReturnsFunctionName()
 {
     auto localSuite = CaraTest::getSuite();
-    CaraTest::areEqual("LocalGetSuiteWithoutNameReturnsFunctionName", localSuite->name());
+
+    auto hasFunctionName = localSuite->name().find("LocalGetSuiteWithoutNameReturnsFunctionName") != std::string::npos;
+    CaraTest::isTrue(hasFunctionName);
+    
+    // We cant test on the exact name because each compiler returns a different name
+    //CaraTest::areEqual("LocalGetSuiteWithoutNameReturnsFunctionName", localSuite->name());
 }
 auto helper3 = helper->add("LocalGetSuiteWithoutNameReturnsFunctionName", LocalGetSuiteWithoutNameReturnsFunctionName);
 auto helper4 = helper->add("LocalGetSuiteWithNameReturnsGivenName", []()
