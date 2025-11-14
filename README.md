@@ -136,14 +136,14 @@ enum class TokenKind
     ...
 };
 
-QString stringify(TokenKind kind)
+std::string stringify(TokenKind kind)
 {
     switch (kind)
     {
         case TokenKind::Plus:
-            return QString("Plus");
+            return std::string("Plus");
         case TokenKind::Minus:
-            return QString("Minus");
+            return std::string("Minus");
         ...
     }
 }
