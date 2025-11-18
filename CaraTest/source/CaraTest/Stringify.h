@@ -31,7 +31,7 @@ namespace CaraTest
     CARATEST_API std::string stringify(long long value);
     CARATEST_API std::string stringify(const char* str);
     CARATEST_API std::string stringify(const std::string& string);
-    CARATEST_API std::string stringify(const std::string_view& stringView);
+    CARATEST_API std::string stringify(std::string_view stringView);
     CARATEST_API std::string stringify(const std::chrono::nanoseconds& ns);
 
     template<class T>
@@ -50,6 +50,7 @@ namespace CaraTest
 
     CARATEST_API std::string stringifyAndQuoted(const char* str);
     CARATEST_API std::string stringifyAndQuoted(const std::string& string);
+    CARATEST_API std::string stringifyAndQuoted(std::string_view stringView);
 
     template<class T>
     std::string stringifyAndMaybeQuote(const T& t)

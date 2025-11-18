@@ -29,7 +29,7 @@ namespace CaraTest
         return string;
     }
 
-    std::string stringify(const std::string_view& stringView)
+    std::string stringify(std::string_view stringView)
     {
         return std::string(stringView);
     }
@@ -58,12 +58,17 @@ namespace CaraTest
 
     std::string stringifyAndQuoted(const char* str)
     {
-        return "\"" + std::string(str) + "\"";
+        return stringifyAndQuoted(std::string(str));
     }
 
     std::string stringifyAndQuoted(const std::string& string)
     {
         return "\"" + string + "\"";
+    }
+
+    std::string stringifyAndQuoted(std::string_view stringView)
+    {
+        return stringifyAndQuoted(std::string(stringView));
     }
 
     std::string sanitize(const std::string& input)
