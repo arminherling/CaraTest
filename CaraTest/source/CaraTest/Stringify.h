@@ -20,6 +20,9 @@ namespace CaraTest
     template<>
     struct is_string_like<std::string> : std::true_type {};
 
+    template<>
+    struct is_string_like<std::string_view> : std::true_type {};
+
     template<typename T>
     constexpr bool is_string_like_v = is_string_like<std::decay_t<T>>::value;
 
@@ -28,6 +31,7 @@ namespace CaraTest
     CARATEST_API std::string stringify(long long value);
     CARATEST_API std::string stringify(const char* str);
     CARATEST_API std::string stringify(const std::string& string);
+    CARATEST_API std::string stringify(const std::string_view& stringView);
     CARATEST_API std::string stringify(const std::chrono::nanoseconds& ns);
 
     template<class T>

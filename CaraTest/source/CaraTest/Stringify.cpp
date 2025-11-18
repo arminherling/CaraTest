@@ -29,6 +29,11 @@ namespace CaraTest
         return string;
     }
 
+    std::string stringify(const std::string_view& stringView)
+    {
+        return std::string(stringView);
+    }
+
     std::string stringify(const std::chrono::nanoseconds& input)
     {
         auto ns = input;
