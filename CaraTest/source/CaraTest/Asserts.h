@@ -10,8 +10,8 @@
 
 namespace CaraTest
 {
-    CARATEST_API [[noreturn]] void fail(const std::source_location& location = std::source_location::current());
-    CARATEST_API [[noreturn]] void skip(const std::source_location& location = std::source_location::current());
+    [[noreturn]] CARATEST_API void fail(const std::source_location& location = std::source_location::current());
+    [[noreturn]] CARATEST_API void skip(const std::source_location& location = std::source_location::current());
     CARATEST_API void isTrue(bool value, const std::source_location& location = std::source_location::current());
     CARATEST_API void isFalse(bool value, const std::source_location& location = std::source_location::current());
 
