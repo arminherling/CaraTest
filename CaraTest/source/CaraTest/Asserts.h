@@ -10,8 +10,8 @@
 
 namespace CaraTest
 {
-    CARATEST_API void fail(const std::source_location& location = std::source_location::current());
-    CARATEST_API void skip(const std::source_location& location = std::source_location::current());
+    CARATEST_API [[noreturn]] void fail(const std::source_location& location = std::source_location::current());
+    CARATEST_API [[noreturn]] void skip(const std::source_location& location = std::source_location::current());
     CARATEST_API void isTrue(bool value, const std::source_location& location = std::source_location::current());
     CARATEST_API void isFalse(bool value, const std::source_location& location = std::source_location::current());
 
@@ -55,7 +55,13 @@ namespace CaraTest
             );
         }
 
-        const auto fileContent = File::readContent(expectedContentFilePath);
+        const auto optionalFileContent = File::readContent(expectedContentFilePath);
+        if (!optionalFileContent.has_value())
+        {
+            fail(location);
+        }
+
+        const auto fileContent = optionalFileContent.value();
         if (actualValue != fileContent)
         {
             const auto snapshotFilePath = expectedContentFilePath.string() + ".snapshot";
