@@ -82,4 +82,5 @@ namespace CaraTest
     }
 
     CARATEST_API std::string sanitize(const std::string& input);
+    CARATEST_API std::string normalizeNewlines(const std::string& input);
 }

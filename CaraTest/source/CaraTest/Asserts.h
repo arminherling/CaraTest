@@ -62,15 +62,17 @@ namespace CaraTest
         }
 
         const auto fileContent = optionalFileContent.value();
-        if (actualValue != fileContent)
+        const auto normalizedFileContent = normalizeNewlines(fileContent);
+        const auto normalizedActualValue = normalizeNewlines(stringifiedActualValue);
+        if (normalizedActualValue != normalizedFileContent)
         {
             const auto snapshotFilePath = expectedContentFilePath.string() + ".snapshot";
             File::writeContent(snapshotFilePath, stringifiedActualValue);
 
             HANDLE_CARATEST_FAILURE();
             throw SnapshotCreatedTestException(
-                stringifyAndMaybeQuote(fileContent), 
-                stringifyAndMaybeQuote(actualValue), 
+                stringifyAndMaybeQuote(normalizedFileContent), 
+                stringifyAndMaybeQuote(normalizedActualValue), 
                 snapshotFilePath, 
                 location
             );

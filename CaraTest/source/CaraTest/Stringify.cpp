@@ -93,4 +93,32 @@ namespace CaraTest
 
         return result;
     }
+
+    std::string normalizeNewlines(const std::string& input)
+    {
+        std::string result;
+        result.reserve(input.size());
+        for (size_t i = 0; i < input.size(); ++i)
+        {
+            if (input[i] == '\r')
+            {
+                if (i + 1 < input.size() && input[i + 1] == '\n')
+                {
+                    // replace '\r\n' with '\n'
+                    result += '\n';
+                    ++i;
+                }
+                else
+                {
+                    // replace single '\r' with '\n'
+                    result += '\n';
+                }
+            }
+            else
+            {
+                result += input[i];
+            }
+        }
+        return result;
+    }
 }
