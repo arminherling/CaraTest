@@ -12,7 +12,6 @@ option(CARATEST_BUILD_TOOLS "Enable building tools." OFF)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
-include(Qt6)
 
 
 add_subdirectory(CaraTest)
@@ -24,6 +23,7 @@ if(CARATEST_BUILD_TESTS)
 endif()
 
 if(CARATEST_BUILD_TOOLS)
+    include(Qt6)
     add_subdirectory(Tools/CaraTestSnapshotTool)
 
     # Installiere das Tool
